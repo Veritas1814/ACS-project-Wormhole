@@ -1,0 +1,14 @@
+buying,maint,doors,persons,lug_boot,safety,car_evaluation
+low,med,4,2,small,low,unacc
+low,vhigh,3,4,small,low,unacc
+low,med,5more,more,big,low,unacc
+low,med,4,4,small,med,acc
+vhigh,high,3,2,big,high,unacc
+low,vhigh,2,more,small,med,unacc
+low,vhigh,5more,2,big,low,unacc
+low,high,4,4,big,high,vgood
+low,med,3,more,big,high,vgood
+high,high,5more,4,small,low,unacc
+med,high,3,4,small,low,unacc
+vhigh,med,4,more,big,med,acc
+high,low,3,4,med,high,acc
