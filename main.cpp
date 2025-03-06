@@ -186,8 +186,8 @@ void printTree(Node* node, const string& prefix = "", bool isLeft = true) {
 }
 
 int main() {
-    string trainFile = "train.csv";
-    string testFile = "test.csv";
+    string trainFile = "iris_train2.csv";
+    string testFile = "output_py.csv";
 
     InputReader trainReader(trainFile);
     Table trainTable = trainReader.getTable();
