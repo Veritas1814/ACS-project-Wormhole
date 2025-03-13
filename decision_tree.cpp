@@ -23,7 +23,7 @@ public:
     Node() : feature(-1), threshold(0.0), value(-1), isLeaf(false), left(nullptr), right(nullptr) {}
 };
 
-// Клас дерева
+// Клас дерева рішень
 class DecisionTree {
 public:
     std::shared_ptr<Node> root;
@@ -55,6 +55,11 @@ public:
 
         // Побудова дерева
         root = buildTree(tree, 0);
+
+        // Debugging: Print root node details
+        std::cout << "Root Node: Feature = " << root->feature
+                  << ", Threshold = " << root->threshold
+                  << ", IsLeaf = " << root->isLeaf << std::endl;
     }
 
     // Рекурсивна функція для побудови дерева
@@ -88,26 +93,39 @@ public:
     // Функція для передбачення
     std::string predict(const std::vector<double>& sample) {
         auto node = root;
+        std::cout << "Predicting Sample: ";
+        for (double feature : sample) {
+            std::cout << feature << " ";
+        }
+        std::cout << std::endl;
+
         while (!node->isLeaf) {
+            std::cout << "Checking Feature " << node->feature << " with Threshold " << node->threshold << std::endl;
             if (sample[node->feature] < node->threshold) {
                 node = node->left;
             } else {
                 node = node->right;
             }
         }
-        // Ensure correct mapping of the predicted class
+
+        std::cout << "Predicted Class Index: " << node->value << " (" << classLabels[node->value] << ")" << std::endl;
         return classLabels[node->value];
     }
-
 
     // Функція для читання CSV файлу
     void CSVReader(const std::string& filename, std::vector<std::vector<double>>& data, std::vector<int>& labels) {
         std::ifstream file(filename);
+        if (!file.is_open()) {
+            std::cerr << "Помилка: не вдалося відкрити файл " << filename << std::endl;
+            return;
+        }
+
+
         std::string line;
         std::unordered_map<std::string, int> classMapping;
         int classIndex = 0;
 
-        std::getline(file, line);  // Пропускаємо перший рядок (заголовок)
+        std::getline(file, line);  // Пропускаємо заголовок
 
         while (std::getline(file, line)) {
             std::stringstream ss(line);
@@ -123,15 +141,16 @@ public:
                     labels.push_back(classMapping[value]);  // Додаємо мітку класу
                 }
             }
-            row.pop_back();  // Видаляємо останню колонку, яка є міткою
-            data.push_back(row);  // Додаємо дані в масив
+            if (!row.empty()) {
+                data.push_back(row);
+            }
         }
     }
 };
 
 int main() {
     DecisionTree tree;
-    tree.loadFromJson("decision_tree.json");
+    tree.loadFromJson("tree.json");
 
     std::vector<std::vector<double>> testData;
     std::vector<int> testLabels;
@@ -140,10 +159,32 @@ int main() {
     tree.CSVReader("iris_test.csv", testData, testLabels);
 
     // Передбачення
+    std::vector<std::string> predictedClasses;
     for (const auto& sample : testData) {
         std::string predictedClass = tree.predict(sample);
-        std::cout << "Predicted Class: " << predictedClass << "\n";
+        predictedClasses.push_back(predictedClass);
     }
+
+    // Завантажуємо очікувані значення
+    std::vector<std::vector<double>> expectedData;
+    std::vector<int> expectedLabels;
+    tree.CSVReader("expected_classes.csv", expectedData, expectedLabels);
+
+    // Порівняння очікуваних і передбачених значень
+    int correct = 0;
+    for (size_t i = 0; i < testData.size(); ++i) {
+        std::string expectedClass = tree.classLabels[expectedLabels[i]];
+
+        std::cout << "Predicted: " << predictedClasses[i] << " | Expected: " << expectedClass << std::endl;
+
+        if (predictedClasses[i] == expectedClass) {
+            correct++;
+        }
+    }
+
+    // Обчислення точності
+    double accuracy = (correct / static_cast<double>(testData.size())) * 100;
+    std::cout << "Accuracy: " << accuracy << "%" << std::endl;
 
     return 0;
 }
