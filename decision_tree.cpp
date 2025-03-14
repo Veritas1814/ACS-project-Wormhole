@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <nlohmann/json.hpp>
+#include <map>
 
 using json = nlohmann::json;
 
@@ -22,21 +23,6 @@ public:
 class DecisionTree {
 public:
     std::shared_ptr<Node> root;
-    std::vector<std::string> classLabels;
-
-    void loadFromJson(const std::string& filename) {
-        std::ifstream file(filename);
-        if (!file.is_open()) {
-            std::cerr << "Error: Cannot open file " << filename << std::endl;
-            return;
-        }
-
-        json treeData;
-        file >> treeData;
-        auto tree = treeData["tree"];
-        classLabels = tree["classes"].get<std::vector<std::string>>();
-        root = buildTree(tree, 0);
-    }
 
     std::shared_ptr<Node> buildTree(const json& treeData, int index) {
         auto node = std::make_shared<Node>();
@@ -53,12 +39,70 @@ public:
         return node;
     }
 
-    std::string predict(const std::vector<double>& sample) {
+    void loadTree(const json& treeData) {
+        root = buildTree(treeData, 0);
+    }
+
+    int predict(const std::vector<double>& sample) {
         auto node = root;
         while (!node->isLeaf) {
             node = (sample[node->feature] < node->threshold) ? node->left : node->right;
         }
-        return classLabels[node->value];
+        return node->value;
+    }
+};
+
+class RandomForest {
+public:
+    std::vector<DecisionTree> trees;
+    std::vector<std::string> classLabels;
+
+    void loadFromJson(const std::string& filename) {
+        std::ifstream file(filename);
+        if (!file.is_open()) {
+            std::cerr << "Error: Cannot open file " << filename << std::endl;
+            return;
+        }
+
+        json forestData;
+        file >> forestData;
+        auto& forest = forestData["forest"];
+        classLabels = forest["classes"].get<std::vector<std::string>>();
+
+        for (size_t i = 0; i < forest["feature"].size(); i++) {
+            DecisionTree tree;
+            json treeJson = {
+                {"feature", forest["feature"][i]},
+                {"threshold", forest["threshold"][i]},
+                {"children_left", forest["children_left"][i]},
+                {"children_right", forest["children_right"][i]},
+                {"value", forest["value"][i]}
+            };
+            tree.loadTree(treeJson);
+            trees.push_back(tree);
+        }
+    }
+
+    std::pair<std::vector<int>, std::string> predict(const std::vector<double>& sample) {
+        std::map<int, int> votes;
+        for (size_t i = 0; i < classLabels.size(); i++) {
+            votes[i] = 0;
+        }
+
+        for (auto& tree : trees) {
+            int prediction = tree.predict(sample);
+            votes[prediction]++;
+        }
+
+        auto maxVote = std::max_element(votes.begin(), votes.end(),
+            [](const auto& a, const auto& b) { return a.second < b.second; });
+
+        std::vector<int> voteCounts;
+        for (size_t i = 0; i < classLabels.size(); i++) {
+            voteCounts.push_back(votes[i]);
+        }
+
+        return {voteCounts, classLabels[maxVote->first]};
     }
 };
 
@@ -83,30 +127,43 @@ void readCSV(const std::string& filename, std::vector<std::vector<double>>& data
     }
 }
 
-void saveCSV(const std::string& filename, const std::vector<std::string>& predictions) {
+void saveCSV(const std::string& filename, const std::vector<std::vector<int>>& voteStats, const std::vector<std::string>& finalPredictions, const std::vector<std::string>& classLabels) {
     std::ofstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Error: Cannot open file " << filename << std::endl;
         return;
     }
-    file << "Prediction" << std::endl;
-    for (const auto& pred : predictions) {
-        file << pred << std::endl;
+
+    for (const auto& label : classLabels) {
+        file << label << ",";
+    }
+    file << "prediction\n";
+
+    for (size_t i = 0; i < voteStats.size(); i++) {
+        for (const auto& count : voteStats[i]) {
+            file << count << ",";
+        }
+        file << finalPredictions[i] << "\n";
     }
 }
 
 int main() {
-    DecisionTree tree;
-    tree.loadFromJson("tree.json");
+    RandomForest forest;
+    forest.loadFromJson("forest.json");
 
     std::vector<std::vector<double>> testData;
     readCSV("iris_test.csv", testData);
 
-    std::vector<std::string> predictions;
+    std::vector<std::vector<int>> voteStats;
+    std::vector<std::string> finalPredictions;
+
     for (const auto& sample : testData) {
-        predictions.push_back(tree.predict(sample));
+        auto [votes, finalPrediction] = forest.predict(sample);
+        voteStats.push_back(votes);
+        finalPredictions.push_back(finalPrediction);
     }
 
-    saveCSV("iris_test_result.csv", predictions);
+    saveCSV("iris_test_votes.csv", voteStats, finalPredictions, forest.classLabels);
+
     return 0;
 }
