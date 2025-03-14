@@ -4,12 +4,12 @@ GitHub repo for ACS project "Realisation of specialized ML/HPC algorithms on Ten
 ### Prerequisites
 g++, python(with sklearn, pandas, json packages installed), c++(install nlohmann)
 
-### Data descriotion
+### Data description
 To begin with, we provided some example csv files based on iris dataset, which our decision tree and random forest algorithms specify. 
 
 In train.csv there is a dataset which is used for training a tree/forest model in Python. 
 
-### Compiltion
+### Compilation
 Firstly, to train a tree run this:
 ```{bash}
 python3 tree.py
