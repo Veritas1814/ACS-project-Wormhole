@@ -1,10 +1,6 @@
-// decision_tree_op1.cpp
-#include "../include/decision_tree.h"
+#include "decision_tree_op1.h"
 #include <fstream>
 #include <iostream>
-#include <algorithm>
-#include <vector>
-#include <nlohmann/json.hpp>
 
 void DecisionTreeOp1::loadFromJson(const std::string& filename) {
     std::ifstream file(filename);
@@ -16,22 +12,21 @@ void DecisionTreeOp1::loadFromJson(const std::string& filename) {
     file >> treeData;
     auto tree = treeData["tree"];
     classLabels = tree["classes"].get<std::vector<std::string>>();
-
-    int nodeCount = tree["children_left"].size();
-    nodes.resize(nodeCount); // Preallocate space
-
+    nodes.clear();
     buildTree(tree, 0);
 }
 
 int DecisionTreeOp1::buildTree(const json& treeData, int index) {
-    if (index >= nodes.size()) return -1; // Avoid invalid access
-
-    NodeOp1& node = nodes[index]; // Use reference to avoid reallocation issues
-
+    NodeOp1 node;
     if (treeData["children_left"][index] == -1) {
         node.isLeaf = true;
         const auto& values = treeData["value"][index][0];
-        node.value = std::distance(values.begin(), std::max_element(values.begin(), values.end()));
+        int maxIdx = 0;
+        for (int i = 1; i < values.size(); ++i) {
+            if (values[i] > values[maxIdx])
+                maxIdx = i;
+        }
+        node.value = maxIdx;
     } else {
         node.isLeaf = false;
         node.feature = treeData["feature"][index];
@@ -39,28 +34,16 @@ int DecisionTreeOp1::buildTree(const json& treeData, int index) {
         node.leftIndex = buildTree(treeData, treeData["children_left"][index]);
         node.rightIndex = buildTree(treeData, treeData["children_right"][index]);
     }
-    return index;
+    nodes.push_back(node);
+    return nodes.size() - 1;
 }
 
 std::string DecisionTreeOp1::predict(const std::vector<double>& sample) {
     int cur = 0;
     while (!nodes[cur].isLeaf) {
-        if (sample.size() <= nodes[cur].feature) {
-            std::cerr << "Error: Sample data is too small for the current tree node feature index!" << std::endl;
-            return "";
-        }
         cur = (sample[nodes[cur].feature] < nodes[cur].threshold)
                   ? nodes[cur].leftIndex
                   : nodes[cur].rightIndex;
     }
-
-    std::string predict(const std::vector<double>& sample) {
-        int cur = 0;
-        while (!nodes[cur].isLeaf) {
-            cur = (sample[nodes[cur].feature] < nodes[cur].threshold)
-                      ? nodes[cur].leftIndex
-                      : nodes[cur].rightIndex;
-        }
-        return classLabels[nodes[cur].value];
-    }
-};
+    return classLabels[nodes[cur].value];
+}
