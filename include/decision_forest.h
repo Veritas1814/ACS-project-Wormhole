@@ -1,6 +1,7 @@
-#pragma once
+#ifndef RANDOMFOREST_H
+#define RANDOMFOREST_H
 
-#include "decision_tree.h"
+#include "../include/decision_tree.h"
 #include <vector>
 #include <string>
 #include <map>
@@ -13,3 +14,5 @@ public:
     void loadFromJson(const std::string& filename);
     std::pair<std::vector<int>, std::string> predict(const std::vector<double>& sample);
 };
+
+#endif
