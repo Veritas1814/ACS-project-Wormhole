@@ -1,4 +1,4 @@
-#include "../include/decision_tree.h"
+#include "decision_tree.h"
 #include <fstream>
 #include <iostream>
 #include <algorithm> // for std::max_element
@@ -62,6 +62,8 @@ std::shared_ptr<Node> DecisionTree::buildTree(const json& treeData, int index) {
 }
 
 void DecisionTree::loadTree(const json& treeData) {
+    classLabels = treeData["classes"].get<std::vector<std::string>>();
+
     if (treeData.find("children_left") == treeData.end() ||
         treeData.find("children_right") == treeData.end()) {
         std::cerr << "Error: Missing necessary tree structure fields in JSON." << std::endl;
@@ -79,9 +81,7 @@ std::string DecisionTree::predict(const std::vector<double>& sample) {
             std::cerr << "Error: Sample data is too small for the current tree node feature index!" << std::endl;
             return "";
         }
-
         node = (sample[node->feature] < node->threshold) ? node->left : node->right;
     }
-
     return node ? classLabels[node->value] : "";
 }
