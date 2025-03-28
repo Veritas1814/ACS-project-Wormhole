@@ -11,13 +11,13 @@ struct NodeOp4 {
 	double threshold;
 	int value;
 	bool isLeaf;
-	int leftIndex;
-	int rightIndex;
+	std::shared_ptr<NodeOp4> leftIndex;
+	std::shared_ptr<NodeOp4> rightIndex;
 };
 
 class DecisionTreeOp4 {
 public:
-	std::vector<NodeOp4> nodes;
+	std::vector<std::shared_ptr<NodeOp4>> nodes;
 	std::vector<std::string> classLabels;
 
 	void loadFromJson(const std::string& filename);

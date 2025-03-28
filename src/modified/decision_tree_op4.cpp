@@ -17,40 +17,40 @@ void DecisionTreeOp4::loadFromJson(const std::string& filename) {
 }
 
 void DecisionTreeOp4::buildTree(const json& treeData) {
-    std::queue<int> q;
-    q.push(0);
-    while (!q.empty()) {
-        int idx = q.front();
-        q.pop();
-        NodeOp4 node;
+    size_t nNodes = treeData["children_left"].size();
+    nodes.resize(nNodes);
+
+    // Initialize nodes with shared pointers
+    for (size_t idx = 0; idx < nNodes; idx++) {
+        nodes[idx] = std::make_shared<NodeOp4>();
+    }
+
+    for (size_t idx = 0; idx < nNodes; idx++) {
+        auto& node = nodes[idx];
+
         if (treeData["children_left"][idx] == -1) {
-            node.isLeaf = true;
+            node->isLeaf = true;
             const auto& vals = treeData["value"][idx][0];
-            int maxIdx = std::max_element(vals.begin(), vals.end()) - vals.begin();
-            node.value = maxIdx;
-            node.feature = -1;
-            node.threshold = 0.0;
-            node.leftIndex = -1;
-            node.rightIndex = -1;
+            node->value = std::distance(vals.begin(), std::max_element(vals.begin(), vals.end()));
+            node->feature = -1;
+            node->threshold = 0.0;
+            node->leftIndex = nullptr;
+            node->rightIndex = nullptr;
         } else {
-            node.isLeaf = false;
-            node.feature = treeData["feature"][idx];
-            node.threshold = treeData["threshold"][idx];
-            q.push(treeData["children_left"][idx]);
-            q.push(treeData["children_right"][idx]);
-            node.leftIndex = treeData["children_left"][idx];
-            node.rightIndex = treeData["children_right"][idx];
+            node->isLeaf = false;
+            node->feature = treeData["feature"][idx];
+            node->threshold = treeData["threshold"][idx];
+            node->leftIndex = nodes[treeData["children_left"][idx]];
+            node->rightIndex = nodes[treeData["children_right"][idx]];
         }
-        nodes.push_back(node);
     }
 }
 
+
 std::string DecisionTreeOp4::predict(const std::vector<double>& sample) {
-    int cur = 0;
-    while (!nodes[cur].isLeaf) {
-        cur = (sample[nodes[cur].feature] < nodes[cur].threshold)
-                  ? nodes[cur].leftIndex
-                  : nodes[cur].rightIndex;
+    std::shared_ptr<NodeOp4> cur = nodes[0];
+    while (!cur->isLeaf) {
+        cur = (sample[cur->feature] < cur->threshold) ? cur->leftIndex : cur->rightIndex;
     }
-    return classLabels[nodes[cur].value];
+    return classLabels[cur->value];
 }
