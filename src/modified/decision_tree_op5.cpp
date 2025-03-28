@@ -4,11 +4,9 @@
 #include <queue>
 #include <algorithm>
 
-using json = nlohmann::json;
-
 void DecisionTreeOp5::loadFromJson(const std::string& filename) {
     std::ifstream file(filename);
-    if(!file.is_open()){
+    if (!file.is_open()) {
         std::cerr << "Error: Cannot open file " << filename << std::endl;
         return;
     }
@@ -17,38 +15,34 @@ void DecisionTreeOp5::loadFromJson(const std::string& filename) {
     auto tree = treeData["tree"];
     classLabels = tree["classes"].get<std::vector<std::string>>();
     nodes.clear();
-    
     buildTree(tree, 0);
 }
 
-int DecisionTreeOp5::buildTree(const json& treeData, int index) {
-    NodeOp5 node;
+void DecisionTreeOp5::buildTree(const json& treeData, int index) {
+    if (index >= nodes.size()) nodes.resize(index + 1);
+    NodeOp5& node = nodes[index];
+
     if (treeData["children_left"][index] == -1) {
         node.isLeaf = true;
         const auto& values = treeData["value"][index][0];
-        int maxIdx = 0;
-        for (int i = 1; i < values.size(); ++i) {
-            if (values[i] > values[maxIdx])
-                maxIdx = i;
-        }
-        node.value = maxIdx;
+        node.value = std::distance(values.begin(), std::max_element(values.begin(), values.end()));
         node.feature = -1;
         node.threshold = 0.0;
     } else {
         node.isLeaf = false;
         node.feature = treeData["feature"][index];
         node.threshold = treeData["threshold"][index];
-        int leftIndex = buildTree(treeData, treeData["children_left"][index]);
-        int rightIndex = buildTree(treeData, treeData["children_right"][index]);
+        node.leftIndex = 2 * index + 1;
+        node.rightIndex = 2 * index + 2;
+        buildTree(treeData, node.leftIndex);
+        buildTree(treeData, node.rightIndex);
     }
-    nodes.push_back(node);
-    return nodes.size() - 1;
 }
 
-std::string DecisionTreeOp5::predict(const std::vector<double>& sample) {
+std::string DecisionTreeOp5::predict(const std::vector<double>& sample) const {
     int cur = 0;
     while (!nodes[cur].isLeaf) {
-        cur = (sample[nodes[cur].feature] >= nodes[cur].threshold) ? 2 * cur + 2 : 2 * cur + 1;
+        cur = 2 * cur + 1 + (sample[nodes[cur].feature] >= nodes[cur].threshold);
     }
     return classLabels[nodes[cur].value];
 }
