@@ -23,6 +23,13 @@ add_library(test_tree_op4 STATIC src/modified/decision_tree_op4.cpp)
 add_library(test_tree_op5 STATIC src/modified/decision_tree_op5.cpp)
 add_library(test_tree_op6 STATIC src/modified/decision_tree_op6.cpp)
 
+target_link_libraries(test_tree_op1 PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(test_tree_op2 PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(test_tree_op3 PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(test_tree_op4 PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(test_tree_op5 PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(test_tree_op6 PRIVATE nlohmann_json::nlohmann_json)
+
 
 # Link libraries to all executables
 target_link_libraries(test_tree nlohmann_json::nlohmann_json)
