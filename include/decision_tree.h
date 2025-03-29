@@ -1,5 +1,4 @@
-#ifndef DECISIONTREE_H
-#define DECISIONTREE_H
+#pragma once
 
 #include "node.h"
 #include <nlohmann/json.hpp>
@@ -19,5 +18,3 @@ public:
     std::shared_ptr<Node> buildTree(const json& treeData, int index);
     std::string predict(const std::vector<double>& sample);
 };
-
-#endif

@@ -1,5 +1,7 @@
 data/forest.json
 data/tree.json
+data/iris_test_result.csv
 build
 .venv
-data/iris_test_result.csv
+myenv/
+.idea/
