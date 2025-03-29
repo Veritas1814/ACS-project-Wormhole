@@ -11,7 +11,9 @@ if len(sys.argv) != 5:
     sys.exit(1)
 
 # Define data directory
-data_dir = "../data"
+
+data_dir = "data"
+
 
 # Get file paths from arguments
 train_file = os.path.join(data_dir, sys.argv[1])
