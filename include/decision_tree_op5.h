@@ -14,6 +14,7 @@ struct NodeOp5 {
     bool isLeaf;
     int leftIndex;
     int rightIndex;
+
 };
 
 class DecisionTreeOp5 {
