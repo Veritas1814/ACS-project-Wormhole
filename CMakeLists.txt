@@ -13,7 +13,8 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 # Executables
 add_executable(test_tree src/test_tree.cpp src/decision_tree.cpp src/node.cpp src/decision_forest.cpp)
 add_executable(test_forest src/test_forest.cpp src/decision_forest.cpp src/node.cpp src/decision_tree.cpp)
-add_executable(benchmark_wormhole src/benchmark.cpp src/decision_tree.cpp src/node.cpp)
+add_executable(test_forest_tp src/test_forest.cpp src/decision_forest_tp.cpp src/thread_pool.cpp src/node.cpp src/decision_tree.cpp)
+add_executable(benchmark_wormhole src/benchmark.cpp src/decision_tree.cpp src/node.cpp src/modified/decision_tree_final.cpp)
 
 # Optimized versions of decision tree
 add_library(test_tree_op1 STATIC src/modified/decision_tree_op1.cpp)
@@ -34,6 +35,7 @@ target_link_libraries(test_tree_op6 PRIVATE nlohmann_json::nlohmann_json)
 # Link libraries to all executables
 target_link_libraries(test_tree nlohmann_json::nlohmann_json)
 target_link_libraries(test_forest nlohmann_json::nlohmann_json)
+target_link_libraries(test_forest_tp nlohmann_json::nlohmann_json)
 target_link_libraries(benchmark_wormhole
         benchmark::benchmark
         test_tree_op1

@@ -12,6 +12,7 @@
 #include "decision_tree_op4.h"
 #include "decision_tree_op5.h"
 #include "decision_tree_op6.h"
+#include "decision_tree_final.h"
 
 #include "decision_tree.h"
 
@@ -82,7 +83,7 @@ void loadTreeFromJson(TreeType& tree, const std::string& filename) {
         return;
     }
 
-    std::cout << "Loaded JSON Data: " << treeData.dump(4) << std::endl;
+    //std::cout << "Loaded JSON Data: " << treeData.dump(4) << std::endl;
 
     try {
         tree.loadFromJson(treeData.dump());  // Ensure correct format
@@ -92,20 +93,20 @@ void loadTreeFromJson(TreeType& tree, const std::string& filename) {
 }
 
 void comparePredictions(const std::vector<std::string>& py_preds, const std::vector<std::string>& cpp_preds) {
-    std::cout << "Comparison done" << std::endl;
+    //std::cout << "Comparison done" << std::endl;
 
     int failed_count = 0;
     for (size_t i = 0; i < py_preds.size(); ++i) {
         if (py_preds[i] != cpp_preds[i]) {
             ++failed_count;
-            std::cout << "Failed: " << i << ", Predicted: " << cpp_preds[i] << ", Actual: " << py_preds[i] << std::endl;
+            //std::cout << "Failed: " << i << ", Predicted: " << cpp_preds[i] << ", Actual: " << py_preds[i] << std::endl;
         }
     }
 
     if (failed_count == 0) {
-        std::cout << "All correct" << std::endl;
+        //std::cout << "All correct" << std::endl;
     } else {
-        std::cout << failed_count << " failed classes" << std::endl;
+        //std::cout << failed_count << " failed classes" << std::endl;
     }
 }
 
@@ -134,7 +135,7 @@ void BM_DecisionTree(benchmark::State& state, const std::string& treeJson, const
     // Save predictions to a CSV
     std::string outputCsv = cppPredictionsCsv.substr(0, cppPredictionsCsv.find_last_of('.')) + suffix;
     saveCSV(outputCsv, cpp_predictions);
-    std::cout << "Predictions saved to " << outputCsv << std::endl;
+    //std::cout << "Predictions saved to " << outputCsv << std::endl;
 }
 
 
@@ -166,11 +167,14 @@ int main(int argc, char** argv) {
     benchmark::RegisterBenchmark("BM_DecisionTree_Op4", [=](benchmark::State& state) {
        BM_DecisionTree<DecisionTreeOp4, double>(state, treeJson, testCsv, pyPredictionsCsv, cppPredictionsCsv, "_op4.csv");
     });
-    benchmark::RegisterBenchmark("BM_DecisionTree_Op5", [=](benchmark::State& state) {
-       BM_DecisionTree<DecisionTreeOp5, double>(state, treeJson, testCsv, pyPredictionsCsv, cppPredictionsCsv, "_op5.csv");
-    });
+    // benchmark::RegisterBenchmark("BM_DecisionTree_Op5", [=](benchmark::State& state) {
+    //    BM_DecisionTree<DecisionTreeOp5, double>(state, treeJson, testCsv, pyPredictionsCsv, cppPredictionsCsv, "_op5.csv");
+    // });
     benchmark::RegisterBenchmark("BM_DecisionTree_Op6", [=](benchmark::State& state) {
        BM_DecisionTree<DecisionTreeOp6, double>(state, treeJson, testCsv, pyPredictionsCsv, cppPredictionsCsv, "_op6.csv");
+    });
+    benchmark::RegisterBenchmark("BM_DecisionTree_Final", [=](benchmark::State& state) {
+        BM_DecisionTree<DecisionTreeFinal, double>(state, treeJson, testCsv, pyPredictionsCsv, cppPredictionsCsv, "_final.csv");
     });
 
     ::benchmark::Initialize(&argc, argv);
