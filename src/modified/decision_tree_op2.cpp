@@ -2,8 +2,6 @@
 #include <fstream>
 #include <iostream>
 
-NodeOp2::NodeOp2() : feature(-1), threshold(0.0f), value(-1), isLeaf(false) {}
-
 void DecisionTreeOp2::loadFromJson(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()){
@@ -17,8 +15,8 @@ void DecisionTreeOp2::loadFromJson(const std::string& filename) {
     root = buildTree(tree, 0);
 }
 
-std::shared_ptr<NodeOp2> DecisionTreeOp2::buildTree(const json& treeData, int index) {
-    auto node = std::make_shared<NodeOp2>();
+std::shared_ptr<DecisionTreeOp2::NodeOp2> DecisionTreeOp2::buildTree(const json& treeData, int index) {
+    auto node = std::make_shared<DecisionTreeOp2::NodeOp2>();
     if (treeData["children_left"][index] == -1) {
         node->isLeaf = true;
         const auto& values = treeData["value"][index][0];

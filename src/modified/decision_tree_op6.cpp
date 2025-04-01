@@ -6,8 +6,6 @@
 
 using json = nlohmann::json;
 
-NodeOp6::NodeOp6() : feature(-1), threshold(0.0), value(-1), isLeaf(false), left(nullptr), right(nullptr) {}
-
 void DecisionTreeOp6::loadFromJson(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -23,8 +21,8 @@ void DecisionTreeOp6::loadFromJson(const std::string& filename) {
     root = buildTree(tree, 0);
 }
 
-std::shared_ptr<NodeOp6> DecisionTreeOp6::buildTree(const json& treeData, int index) {
-    auto node = std::make_shared<NodeOp6>();
+std::shared_ptr<DecisionTreeOp6::NodeOp6> DecisionTreeOp6::buildTree(const json& treeData, int index) {
+    auto node = std::make_shared<DecisionTreeOp6::NodeOp6>();
     if (treeData["children_left"][index] == -1) {
         node->isLeaf = true;
         const auto& vals = treeData["value"][index][0];
