@@ -11,7 +11,6 @@
 #include "decision_tree_op3.h"
 #include "decision_tree_op4.h"
 #include "decision_tree_op5.h"
-#include "decision_tree_op6.h"
 #include "decision_tree_final.h"
 
 #include "decision_tree.h"
@@ -170,9 +169,6 @@ int main(int argc, char** argv) {
     // benchmark::RegisterBenchmark("BM_DecisionTree_Op5", [=](benchmark::State& state) {
     //    BM_DecisionTree<DecisionTreeOp5, double>(state, treeJson, testCsv, pyPredictionsCsv, cppPredictionsCsv, "_op5.csv");
     // });
-    benchmark::RegisterBenchmark("BM_DecisionTree_Op6", [=](benchmark::State& state) {
-       BM_DecisionTree<DecisionTreeOp6, double>(state, treeJson, testCsv, pyPredictionsCsv, cppPredictionsCsv, "_op6.csv");
-    });
     benchmark::RegisterBenchmark("BM_DecisionTree_Final", [=](benchmark::State& state) {
         BM_DecisionTree<DecisionTreeFinal, double>(state, treeJson, testCsv, pyPredictionsCsv, cppPredictionsCsv, "_final.csv");
     });
