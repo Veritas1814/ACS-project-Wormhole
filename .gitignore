@@ -1,7 +1,4 @@
-data/forest.json
-data/tree.json
-data/iris_test_result.csv
-build
-.venv
-myenv/
+data/
+build/
+.venv/
 .idea/
