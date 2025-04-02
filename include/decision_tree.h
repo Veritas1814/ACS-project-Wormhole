@@ -10,11 +10,12 @@ using json = nlohmann::json;
 
 class DecisionTree {
 public:
-    std::shared_ptr<Node> root;
-    std::vector<std::string> classLabels;
-
     void loadFromJson(const std::string& filename);
     void loadTree(const json& treeData);
     std::shared_ptr<Node> buildTree(const json& treeData, int index);
     std::string predict(const std::vector<double>& sample);
+
+private:
+    std::shared_ptr<Node> root;
+    std::vector<std::string> classLabels;
 };
