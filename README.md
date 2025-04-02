@@ -48,10 +48,10 @@ To run a programe:
 ```{bash}
 ./test_tree
 ./test_forest
-./benchmark_wormhole tree.json iris_test.csv
-sudo ./plot_result tree.json iris_test.csv --benchmark_format=json --benchmark_out=benchmark_results.json
+./benchmark_wormhole <tree_output_file_json> <test_file_csv>
+sudo ./plot_result <tree_output_file_json> <test_file_csv> --benchmark_format=json --benchmark_out=benchmark_results.json
 cd ..
-python3 plot_benchmarks.py    
+python utils/plot_benchmarks.py    
 ```
 The script will generate the following files in the data folder:
 
