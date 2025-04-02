@@ -65,46 +65,44 @@ std::pair<std::vector<int>, std::string> RandomForest::predict(const std::vector
     for (auto& tree : trees) {
         int prediction = -1;
         try {
-            std::string predStr = tree.predict(sample); // Predict class label
+            std::string predStr = tree.predict(sample);
 
             // Find the index of the predicted class
-            prediction = std::distance(classLabels.begin(), std::find(classLabels.begin(), classLabels.end(), predStr));
-
-            if (prediction == -1) {
+            auto it = std::find(classLabels.begin(), classLabels.end(), predStr);
+            if (it == classLabels.end()) {
                 std::cerr << "Error: Class label '" << predStr << "' not found in classLabels" << std::endl;
-                continue;  // Skip this tree if class label is not found
+                continue;
             }
+            prediction = std::distance(classLabels.begin(), it);
         } catch (const std::exception &e) {
             std::cerr << "Error in tree prediction: " << e.what() << std::endl;
-            continue;  // Skip this tree if there is an exception
+            continue;
         }
 
-        // Check if the prediction index is within valid bounds
         if (prediction < 0 || static_cast<size_t>(prediction) >= classLabels.size()) {
             std::cerr << "Warning: tree prediction " << prediction << " is out of valid range" << std::endl;
-            continue;  // Skip this tree if the prediction is out of bounds
+            continue;
         }
 
-        votes[prediction]++;  // Increment the vote for the predicted class
+        votes[prediction]++;
     }
 
     if (votes.empty()) {
-        throw std::runtime_error("No valid votes in random forest prediction");
+        std::cerr << "Error: No valid votes in random forest prediction" << std::endl;
+        return {std::vector<int>(classLabels.size(), 0), ""}; // Return zero votes and empty label
     }
 
-    // Find the class with the maximum votes
     auto maxVote = std::max_element(votes.begin(), votes.end(),
         [](const auto& a, const auto& b) { return a.second < b.second; });
 
     if (maxVote == votes.end()) {
         std::cerr << "Error: No valid votes in random forest prediction" << std::endl;
-        throw std::runtime_error("No valid votes in random forest prediction");
+        return {std::vector<int>(classLabels.size(), 0), ""};
     }
 
-    // Create a vector of vote counts
-    std::vector<int> voteCounts;
-    for (size_t i = 0; i < classLabels.size(); i++) {
-        voteCounts.push_back(votes[i]);
+    std::vector<int> voteCounts(classLabels.size(), 0);
+    for (const auto& [index, count] : votes) {
+        voteCounts[index] = count;
     }
 
     return {voteCounts, classLabels[maxVote->first]};

@@ -87,7 +87,8 @@ std::pair<std::vector<int>, std::string> RandomForest::predict(const std::vector
     }
 
     if (votes.empty()) {
-        throw std::runtime_error("No valid votes in random forest prediction");
+        std::cerr << "Error: No valid votes in random forest prediction" << std::endl;
+        return {std::vector<int>(classLabels.size(), 0), ""}; // Return zero votes and empty label
     }
 
     auto maxVote = std::max_element(votes.begin(), votes.end(),
