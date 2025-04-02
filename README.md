@@ -48,6 +48,15 @@ To run a programe:
 ```{bash}
 ./test_tree
 ./test_forest
-./benchmark_wormhole
+./benchmark_wormhole tree.json iris_test.csv
+sudo ./plot_result tree.json iris_test.csv --benchmark_format=json --benchmark_out=benchmark_results.json
+cd ..
+python3 plot_benchmarks.py    
 ```
+The script will generate the following files in the data folder:
+
+data/benchmark_results.csv <br>
+data/duration_plot.png – A plot of the average execution time per prediction. <br>
+data/iterations_plot.png – A plot of the total number of iterations.
+
 Tree predicts classes for the given instances. Forest predicts class based on maximum vote.
