@@ -64,11 +64,12 @@ static void BM_DecisionTree_Full(benchmark::State& state, const std::string& tre
 }
 
 int main(int argc, char** argv) {
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <tree_json> <test_csv>" << std::endl;
+    if (argc < 3) {
+        std::cerr << "Usage: " << argv[0] << " <tree_json> <test_csv> [benchmark flags]" << std::endl;
         return 1;
     }
 
+    // Use only the first two arguments for your file names
     std::string treeJson = std::string("../data/") + argv[1];
     std::string testCsv  = std::string("../data/") + argv[2];
 
