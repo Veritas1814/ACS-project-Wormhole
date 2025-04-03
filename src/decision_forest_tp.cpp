@@ -1,7 +1,12 @@
 #include "decision_forest.h"
+#include "thread_pool.h"
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <future>
+#include <map>
+#include <vector>
+#include <algorithm>
 
 void RandomForest::loadFromJson(const std::string& filename) {
     std::ifstream file(filename);
@@ -42,8 +47,7 @@ void RandomForest::loadFromJson(const std::string& filename) {
         treeJson["children_left"]  = forest["children_left"][i];
         treeJson["children_right"] = forest["children_right"][i];
         treeJson["value"]          = forest["value"][i];
-
-        treeJson["classes"] = forest["classes"];
+        treeJson["classes"]        = forest["classes"];
 
         try {
             tree.loadTree(treeJson);
@@ -56,35 +60,30 @@ void RandomForest::loadFromJson(const std::string& filename) {
 }
 
 std::pair<std::vector<int>, std::string> RandomForest::predict(const std::vector<double>& sample) {
-    std::map<int, int> votes;
+    ThreadPool pool(std::thread::hardware_concurrency());
 
-    for (size_t i = 0; i < classLabels.size(); i++) {
-        votes[i] = 0;
-    }
+    std::map<int, int> votes;
+    std::mutex voteMutex;
+    std::vector<std::future<int>> futures;
 
     for (auto& tree : trees) {
-        int prediction = -1;
-        try {
-            std::string predStr = tree.predict(sample);
-
-            // Find the index of the predicted class
-            auto it = std::find(classLabels.begin(), classLabels.end(), predStr);
-            if (it == classLabels.end()) {
-                std::cerr << "Error: Class label '" << predStr << "' not found in classLabels" << std::endl;
-                continue;
+        futures.push_back(pool.submit([&tree, &sample, this]() -> int {
+            try {
+                std::string predStr = tree.predict(sample);
+                auto it = std::find(classLabels.begin(), classLabels.end(), predStr);
+                return (it != classLabels.end()) ? std::distance(classLabels.begin(), it) : -1;
+            } catch (...) {
+                return -1;
             }
-            prediction = std::distance(classLabels.begin(), it);
-        } catch (const std::exception &e) {
-            std::cerr << "Error in tree prediction: " << e.what() << std::endl;
-            continue;
-        }
+        }));
+    }
 
-        if (prediction < 0 || static_cast<size_t>(prediction) >= classLabels.size()) {
-            std::cerr << "Warning: tree prediction " << prediction << " is out of valid range" << std::endl;
-            continue;
+    for (auto& future : futures) {
+        int prediction = future.get();
+        if (prediction >= 0 && static_cast<size_t>(prediction) < classLabels.size()) {
+            std::lock_guard<std::mutex> lock(voteMutex);
+            votes[prediction]++;
         }
-
-        votes[prediction]++;
     }
 
     if (votes.empty()) {
@@ -95,14 +94,9 @@ std::pair<std::vector<int>, std::string> RandomForest::predict(const std::vector
     auto maxVote = std::max_element(votes.begin(), votes.end(),
         [](const auto& a, const auto& b) { return a.second < b.second; });
 
-    if (maxVote == votes.end()) {
-        std::cerr << "Error: No valid votes in random forest prediction" << std::endl;
-        return {std::vector<int>(classLabels.size(), 0), ""};
-    }
-
     std::vector<int> voteCounts(classLabels.size(), 0);
-    for (const auto& [index, count] : votes) {
-        voteCounts[index] = count;
+    for (const auto& [classIdx, count] : votes) {
+        voteCounts[classIdx] = count;
     }
 
     return {voteCounts, classLabels[maxVote->first]};
