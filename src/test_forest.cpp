@@ -86,19 +86,19 @@ void comparePredictions(const std::vector<std::string>& py_preds, const std::vec
 
 int main(int argc, char* argv[]) {
     if (argc != 5) {
-        std::cerr << "Usage: " << argv[0] << " <tree_json> <test_csv> <python_predictions_csv> <cpp_predictions_csv>" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <forest_json> <test_csv> <python_predictions_csv> <cpp_predictions_csv>" << std::endl;
         return 1;
     }
 
     // Get file paths from arguments
-    std::string treeJson = std::string("../data/") + argv[1];
+    std::string forestJson = std::string("../data/") + argv[1];
     std::string testCsv = std::string("../data/") + argv[2];
     std::string pyPredictionsCsv = std::string("../data/") + argv[3];
     std::string cppPredictionsCsv = std::string("../data/") + argv[4];
 
     // Load the random forest from JSON
     RandomForest forest;
-    forest.loadFromJson(treeJson);
+    forest.loadFromJson(forestJson);
 
     // Read the test data
     std::vector<std::vector<double>> testData;

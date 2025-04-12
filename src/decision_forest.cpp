@@ -35,7 +35,7 @@ void RandomForest::loadFromJson(const std::string& filename) {
 
     trees.clear();
     for (size_t i = 0; i < forest["feature"].size(); i++) {
-        DecisionTree tree;
+        DecisionTreeFinal tree;
         json treeJson;
         treeJson["feature"]        = forest["feature"][i];
         treeJson["threshold"]      = forest["threshold"][i];
@@ -46,7 +46,7 @@ void RandomForest::loadFromJson(const std::string& filename) {
         treeJson["classes"] = forest["classes"];
 
         try {
-            tree.loadTree(treeJson);
+            tree.buildTree(treeJson);
         } catch (const std::exception &e) {
             std::cerr << "Error loading tree " << i << ": " << e.what() << std::endl;
             continue;

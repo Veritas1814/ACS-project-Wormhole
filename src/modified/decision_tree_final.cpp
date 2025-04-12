@@ -44,6 +44,13 @@ void DecisionTreeFinal::buildTree(const json& treeData) {
 std::string DecisionTreeFinal::predict(const std::vector<double>& sample) {
     int cur = 0;
     while (!nodes[cur].isLeaf) {
+        if (nodes[cur].feature < 0 || static_cast<size_t>(nodes[cur].feature) >= sample.size()) {
+            throw std::out_of_range("Feature index out of bounds");
+        }
+        if (cur < 0 || static_cast<size_t>(cur) >= nodes.size()) {
+            throw std::out_of_range("Node index out of bounds");
+        }
+
         cur = (sample[nodes[cur].feature] < nodes[cur].threshold)
                   ? nodes[cur].leftIndex
                   : nodes[cur].rightIndex;

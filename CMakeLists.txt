@@ -50,22 +50,21 @@ add_executable(test_tree
         src/test_tree.cpp
         src/decision_tree.cpp
         src/node.cpp
-        src/decision_forest.cpp
+#        src/decision_forest.cpp
 )
 
 add_executable(test_forest
         src/test_forest.cpp
         src/decision_forest.cpp
         src/node.cpp
-        src/decision_tree.cpp
+        src/modified/decision_tree_final.cpp
 )
 
 add_executable(test_forest_tp
         src/test_forest.cpp
         src/decision_forest_tp.cpp
         src/node.cpp
-        src/decision_tree.cpp
-        src/thread_pool.cpp
+        src/modified/decision_tree_final.cpp
 )
 
 add_executable(benchmark_wormhole
