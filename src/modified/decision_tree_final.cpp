@@ -18,6 +18,7 @@ void DecisionTreeFinal::loadFromJson(const std::string& filename) {
 
 void DecisionTreeFinal::buildTree(const json& treeData) {
     size_t nNodes = treeData["children_left"].size();
+    classLabels = treeData["classes"].get<std::vector<std::string>>();
     nodes.resize(nNodes);
     for (size_t idx = 0; idx < nNodes; idx++) {
         NodeFinal node;

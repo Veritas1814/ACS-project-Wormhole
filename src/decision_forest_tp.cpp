@@ -49,7 +49,6 @@ void RandomForest::loadFromJson(const std::string& filename) {
         treeJson["children_right"] = forest["children_right"][i];
         treeJson["value"]          = forest["value"][i];
         treeJson["classes"]        = forest["classes"];
-
         try {
             tree.buildTree(treeJson);
         } catch (const std::exception &e) {
@@ -75,11 +74,10 @@ std::pair<std::vector<int>, std::string> RandomForest::predict(const std::vector
 
         threads.emplace_back([&, start_index, end_index]() {
             std::map<int, int> localVotes;
+
             for (size_t j = start_index; j < end_index; ++j) {
                 try {
-                    std::cout << "Tree #" << j << ": predicting...\n";
                     std::string predStr = trees[j].predict(sample);
-                    std::cout << "Tree #" << j << ": prediction = " << predStr << "\n";
                     auto it = std::find(classLabels.begin(), classLabels.end(), predStr);
                     if (it != classLabels.end()) {
                         int classIdx = std::distance(classLabels.begin(), it);

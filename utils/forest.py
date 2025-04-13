@@ -31,7 +31,7 @@ label_encoder = LabelEncoder()
 y_train_encoded = label_encoder.fit_transform(y_train)
 
 # Train the RandomForest model
-model = RandomForestClassifier(n_estimators=1024, random_state=42)
+model = RandomForestClassifier(n_estimators=5000, random_state=42)
 model.fit(X_train, y_train_encoded)
 
 # Save Random Forest structure to JSON

@@ -14,7 +14,7 @@ endif()
 
 project(wormhole CXX)
 set(CMAKE_CXX_STANDARD 20)
-
+set(CMAKE_BUILD_TYPE Debug)
 if(APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT} -stdlib=libc++ -I${CMAKE_OSX_SYSROOT}/usr/include/c++/v1")
 endif()
