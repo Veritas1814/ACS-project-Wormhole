@@ -16,12 +16,7 @@ void RandomForest::loadFromJson(const std::string& filename) {
     }
 
     json forestData;
-    try {
-        file >> forestData;
-    } catch (const std::exception &e) {
-        std::cerr << "Error parsing JSON: " << e.what() << std::endl;
-        return;
-    }
+    file >> forestData;
 
     auto& forest = forestData["forest"];
     if (!forest.contains("classes")) {
@@ -49,12 +44,8 @@ void RandomForest::loadFromJson(const std::string& filename) {
         treeJson["value"]          = forest["value"][i];
         treeJson["classes"]        = forest["classes"];
 
-        try {
-            tree.loadTree(treeJson);
-        } catch (const std::exception &e) {
-            std::cerr << "Error loading tree " << i << ": " << e.what() << std::endl;
-            continue;
-        }
+        tree.loadTree(treeJson);
+
         trees.push_back(tree);
     }
 }
@@ -68,11 +59,7 @@ std::pair<std::vector<int>, int> RandomForest::predict(const std::vector<double>
 
     for (auto& tree : trees) {
         futures.push_back(pool.submit([&tree, &sample]() -> int {
-            try {
-                return tree.predict(sample);
-            } catch (...) {
-                return -1;
-            }
+            return tree.predict(sample);
         }));
     }
 

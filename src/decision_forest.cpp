@@ -11,12 +11,9 @@ void RandomForest::loadFromJson(const std::string& filename) {
     }
 
     json forestData;
-    try {
-        file >> forestData;
-    } catch (const std::exception &e) {
-        std::cerr << "Error parsing JSON: " << e.what() << std::endl;
-        return;
-    }
+
+    file >> forestData;
+
 
     auto& forest = forestData["forest"];
     if (!forest.contains("classes")) {
@@ -37,12 +34,9 @@ void RandomForest::loadFromJson(const std::string& filename) {
         treeJson["value"]          = forest["value"][i];
 
         treeJson["classes"]        = forest["classes"];
-        try {
-            tree.loadTree(treeJson);
-        } catch (const std::exception &e) {
-            std::cerr << "Error loading tree " << i << ": " << e.what() << std::endl;
-            continue;
-        }
+
+        tree.loadTree(treeJson);
+
         trees.push_back(tree);
     }
 }
@@ -52,15 +46,11 @@ std::pair<std::vector<int>, int> RandomForest::predict(const std::vector<double>
     std::vector<int> voteCounts(numClasses, 0);
 
     for (auto& tree : trees) {
-        try {
-            int classIndex = tree.predict(sample);  // <<< This must return an int index
-            if (classIndex >= 0 && static_cast<size_t>(classIndex) < numClasses) {
-                voteCounts[classIndex]++;
-            } else {
-                std::cerr << "Warning: Invalid class index " << classIndex << " from tree" << std::endl;
-            }
-        } catch (const std::exception& e) {
-            std::cerr << "Tree prediction error: " << e.what() << std::endl;
+        int classIndex = tree.predict(sample);  // <<< This must return an int index
+        if (classIndex >= 0 && static_cast<size_t>(classIndex) < numClasses) {
+            voteCounts[classIndex]++;
+        } else {
+            std::cerr << "Warning: Invalid class index " << classIndex << " from tree" << std::endl;
         }
     }
 
