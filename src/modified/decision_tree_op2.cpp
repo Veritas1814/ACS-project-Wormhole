@@ -36,10 +36,10 @@ std::shared_ptr<DecisionTreeOp2::NodeOp2> DecisionTreeOp2::buildTree(const json&
     return node;
 }
 
-std::string DecisionTreeOp2::predict(const std::vector<float>& sample) {
+int DecisionTreeOp2::predict(const std::vector<float>& sample) noexcept {
     auto node = root;
     while (!node->isLeaf) {
         node = (sample[node->feature] < node->threshold) ? node->left : node->right;
     }
-    return classLabels[node->value];
+    return node->value;
 }

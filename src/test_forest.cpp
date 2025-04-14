@@ -26,7 +26,7 @@ void readCSV(const std::string& filename, std::vector<std::vector<double>>& data
     }
 }
 
-void readPredictionsCSV(const std::string& filename, std::vector<std::string>& predictions) {
+void readPredictionsCSV(const std::string& filename, std::vector<int>& predictions) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Error: Cannot open file " << filename << std::endl;
@@ -37,50 +37,54 @@ void readPredictionsCSV(const std::string& filename, std::vector<std::string>& p
     std::getline(file, line); // Skip header
 
     while (std::getline(file, line)) {
-        predictions.push_back(line);
+        predictions.push_back(std::stoi(line));
     }
 }
 
 void saveCSV(const std::string& filename,
              const std::vector<std::vector<int>>& voteStats,
-             const std::vector<std::string>& finalPredictions,
-             const std::vector<std::string>& classLabels) {
+             const std::vector<int>& finalPredictions,
+             int numClasses) {
     std::ofstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Error: Cannot open output file " << filename << std::endl;
         return;
     }
 
-    // Write header row.
-    for (const auto& label : classLabels) {
-        file << label << ",";
+    // Write header
+    for (int i = 0; i < numClasses; ++i) {
+        file << i << ",";
     }
-    file << "prediction" << "\n";
+    file << "prediction\n";
 
-    // Write vote counts and prediction for each sample.
-    for (size_t i = 0; i < voteStats.size(); i++) {
-        for (const auto& count : voteStats[i]) {
+    // Write vote stats and predictions
+    for (size_t i = 0; i < voteStats.size(); ++i) {
+        for (int count : voteStats[i]) {
             file << count << ",";
         }
         file << finalPredictions[i] << "\n";
     }
 }
 
-void comparePredictions(const std::vector<std::string>& py_preds, const std::vector<std::string>& cpp_preds) {
-    std::cout << "comparison done" << std::endl;
+void comparePredictions(const std::vector<int>& py_preds, const std::vector<int>& cpp_preds) {
+    if (py_preds.size() != cpp_preds.size()) {
+        std::cerr << "Prediction size mismatch!" << std::endl;
+        return;
+    }
 
     int failed_count = 0;
     for (size_t i = 0; i < py_preds.size(); ++i) {
         if (py_preds[i] != cpp_preds[i]) {
             ++failed_count;
-            std::cout << "Failed: " << i << ", Predicted: " << cpp_preds[i] << ", Actual: " << py_preds[i] << std::endl;
+            std::cout << "Mismatch at index " << i << ": Python = "
+                      << py_preds[i] << ", C++ = " << cpp_preds[i] << std::endl;
         }
     }
 
     if (failed_count == 0) {
-        std::cout << "All correct" << std::endl;
+        std::cout << "All predictions match!" << std::endl;
     } else {
-        std::cout << failed_count << " failed classes" << std::endl;
+        std::cout << failed_count << " mismatches found." << std::endl;
     }
 }
 
@@ -90,43 +94,35 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Get file paths from arguments
     std::string treeJson = std::string("../data/") + argv[1];
     std::string testCsv = std::string("../data/") + argv[2];
     std::string pyPredictionsCsv = std::string("../data/") + argv[3];
     std::string cppPredictionsCsv = std::string("../data/") + argv[4];
 
-    // Load the random forest from JSON
     RandomForest forest;
     forest.loadFromJson(treeJson);
 
-    // Read the test data
     std::vector<std::vector<double>> testData;
     readCSV(testCsv, testData);
 
-    // Containers for vote statistics and final predictions
     std::vector<std::vector<int>> voteStats;
-    std::vector<std::string> finalPredictions;
+    std::vector<int> finalPredictions;
 
-    // Process each sample
     for (const auto& sample : testData) {
-        // forest.predict should return a pair: vector of vote counts and the predicted class label.
         auto [votes, prediction] = forest.predict(sample);
         voteStats.push_back(votes);
-        finalPredictions.push_back(prediction);
+        finalPredictions.push_back(prediction);  // Ensure prediction is numeric
     }
 
-    // Read Python predictions from the provided CSV
-    std::vector<std::string> py_predictions;
+    std::vector<int> py_predictions;
     readPredictionsCSV(pyPredictionsCsv, py_predictions);
 
-    // Compare predictions between Python and C++
     comparePredictions(py_predictions, finalPredictions);
 
-    // Save results to CSV file (votes and final predictions)
-    saveCSV(cppPredictionsCsv, voteStats, finalPredictions, forest.classLabels);
+    int numClasses = voteStats.empty() ? 0 : voteStats[0].size();
+    saveCSV(cppPredictionsCsv, voteStats, finalPredictions, numClasses);
 
-    std::cout << "Test completed, results saved in 'iris_test_votes.csv'" << std::endl;
+    std::cout << "Test completed. Results saved to: " << cppPredictionsCsv << std::endl;
 
     return 0;
 }

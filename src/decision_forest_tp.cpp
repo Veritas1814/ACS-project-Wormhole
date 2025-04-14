@@ -59,7 +59,7 @@ void RandomForest::loadFromJson(const std::string& filename) {
     }
 }
 
-std::pair<std::vector<int>, std::string> RandomForest::predict(const std::vector<double>& sample) {
+std::pair<std::vector<int>, int> RandomForest::predict(const std::vector<double>& sample) noexcept {
     ThreadPool pool(std::thread::hardware_concurrency());
 
     std::map<int, int> votes;
@@ -67,11 +67,9 @@ std::pair<std::vector<int>, std::string> RandomForest::predict(const std::vector
     std::vector<std::future<int>> futures;
 
     for (auto& tree : trees) {
-        futures.push_back(pool.submit([&tree, &sample, this]() -> int {
+        futures.push_back(pool.submit([&tree, &sample]() -> int {
             try {
-                std::string predStr = tree.predict(sample);
-                auto it = std::find(classLabels.begin(), classLabels.end(), predStr);
-                return (it != classLabels.end()) ? std::distance(classLabels.begin(), it) : -1;
+                return tree.predict(sample);
             } catch (...) {
                 return -1;
             }
@@ -88,7 +86,7 @@ std::pair<std::vector<int>, std::string> RandomForest::predict(const std::vector
 
     if (votes.empty()) {
         std::cerr << "Error: No valid votes in random forest prediction" << std::endl;
-        return {std::vector<int>(classLabels.size(), 0), ""}; // Return zero votes and empty label
+        return {std::vector<int>(classLabels.size(), 0), -1};
     }
 
     auto maxVote = std::max_element(votes.begin(), votes.end(),
@@ -99,5 +97,5 @@ std::pair<std::vector<int>, std::string> RandomForest::predict(const std::vector
         voteCounts[classIdx] = count;
     }
 
-    return {voteCounts, classLabels[maxVote->first]};
+    return {voteCounts, maxVote->first};
 }

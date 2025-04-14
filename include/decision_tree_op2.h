@@ -24,6 +24,6 @@ private:
 public:
 	void loadFromJson(const std::string& filename);
 	std::shared_ptr<NodeOp2> buildTree(const json& treeData, int index);
-	std::string predict(const std::vector<float>& sample);
+	int predict(const std::vector<float>& sample) noexcept;
 
 };

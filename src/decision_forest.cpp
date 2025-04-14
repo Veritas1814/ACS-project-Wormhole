@@ -23,15 +23,8 @@ void RandomForest::loadFromJson(const std::string& filename) {
         std::cerr << "Error: Forest JSON does not contain 'classes'" << std::endl;
         return;
     }
-    classLabels = forest["classes"].get<std::vector<std::string>>();
 
-    if (forest["feature"].size() != forest["threshold"].size() ||
-        forest["children_left"].size() != forest["feature"].size() ||
-        forest["children_right"].size() != forest["feature"].size() ||
-        forest["value"].size() != forest["feature"].size()) {
-        std::cerr << "Error: Mismatch in forest array sizes" << std::endl;
-        return;
-    }
+    classLabels = forest["classes"].get<std::vector<std::string>>();  // Optional: for metadata
 
     trees.clear();
     for (size_t i = 0; i < forest["feature"].size(); i++) {
@@ -43,8 +36,7 @@ void RandomForest::loadFromJson(const std::string& filename) {
         treeJson["children_right"] = forest["children_right"][i];
         treeJson["value"]          = forest["value"][i];
 
-        treeJson["classes"] = forest["classes"];
-
+        treeJson["classes"]        = forest["classes"];
         try {
             tree.loadTree(treeJson);
         } catch (const std::exception &e) {
@@ -55,55 +47,26 @@ void RandomForest::loadFromJson(const std::string& filename) {
     }
 }
 
-std::pair<std::vector<int>, std::string> RandomForest::predict(const std::vector<double>& sample) {
-    std::map<int, int> votes;
-
-    for (size_t i = 0; i < classLabels.size(); i++) {
-        votes[i] = 0;
-    }
+std::pair<std::vector<int>, int> RandomForest::predict(const std::vector<double>& sample) noexcept {
+    size_t numClasses = classLabels.size();  // Could be passed in from elsewhere if classLabels is removed
+    std::vector<int> voteCounts(numClasses, 0);
 
     for (auto& tree : trees) {
-        int prediction = -1;
         try {
-            std::string predStr = tree.predict(sample);
-
-            // Find the index of the predicted class
-            auto it = std::find(classLabels.begin(), classLabels.end(), predStr);
-            if (it == classLabels.end()) {
-                std::cerr << "Error: Class label '" << predStr << "' not found in classLabels" << std::endl;
-                continue;
+            int classIndex = tree.predict(sample);  // <<< This must return an int index
+            if (classIndex >= 0 && static_cast<size_t>(classIndex) < numClasses) {
+                voteCounts[classIndex]++;
+            } else {
+                std::cerr << "Warning: Invalid class index " << classIndex << " from tree" << std::endl;
             }
-            prediction = std::distance(classLabels.begin(), it);
-        } catch (const std::exception &e) {
-            std::cerr << "Error in tree prediction: " << e.what() << std::endl;
-            continue;
+        } catch (const std::exception& e) {
+            std::cerr << "Tree prediction error: " << e.what() << std::endl;
         }
-
-        if (prediction < 0 || static_cast<size_t>(prediction) >= classLabels.size()) {
-            std::cerr << "Warning: tree prediction " << prediction << " is out of valid range" << std::endl;
-            continue;
-        }
-
-        votes[prediction]++;
     }
 
-    if (votes.empty()) {
-        std::cerr << "Error: No valid votes in random forest prediction" << std::endl;
-        return {std::vector<int>(classLabels.size(), 0), ""}; // Return zero votes and empty label
-    }
+    // Get class with max votes
+    int predictedClass = std::distance(voteCounts.begin(),
+                           std::max_element(voteCounts.begin(), voteCounts.end()));
 
-    auto maxVote = std::max_element(votes.begin(), votes.end(),
-        [](const auto& a, const auto& b) { return a.second < b.second; });
-
-    if (maxVote == votes.end()) {
-        std::cerr << "Error: No valid votes in random forest prediction" << std::endl;
-        return {std::vector<int>(classLabels.size(), 0), ""};
-    }
-
-    std::vector<int> voteCounts(classLabels.size(), 0);
-    for (const auto& [index, count] : votes) {
-        voteCounts[index] = count;
-    }
-
-    return {voteCounts, classLabels[maxVote->first]};
+    return {voteCounts, predictedClass};
 }

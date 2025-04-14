@@ -41,12 +41,12 @@ void DecisionTreeFinal::buildTree(const json& treeData) {
 }
 
 
-std::string DecisionTreeFinal::predict(const std::vector<double>& sample) {
+int DecisionTreeFinal::predict(const std::vector<float>& sample) noexcept {
     int cur = 0;
     while (!nodes[cur].isLeaf) {
         cur = (sample[nodes[cur].feature] < nodes[cur].threshold)
                   ? nodes[cur].leftIndex
                   : nodes[cur].rightIndex;
     }
-    return classLabels[nodes[cur].value];
+    return nodes[cur].value;
 }

@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
         BM_DecisionTree_Full<DecisionTreeOp4, double>(state, treeJson, testCsv);
     });
     benchmark::RegisterBenchmark("BM_DecisionTree_Final", [=](benchmark::State& state) {
-        BM_DecisionTree_Full<DecisionTreeFinal, double>(state, treeJson, testCsv);
+        BM_DecisionTree_Full<DecisionTreeFinal, float>(state, treeJson, testCsv);
     });
 
     ::benchmark::Initialize(&argc, argv);

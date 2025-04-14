@@ -38,16 +38,16 @@ int DecisionTreeOp1::buildTree(const json& treeData, int index) {
     return index;
 }
 
-std::string DecisionTreeOp1::predict(const std::vector<double>& sample) {
+int DecisionTreeOp1::predict(const std::vector<double>& sample) noexcept {
     int cur = 0;
     while (!nodes[cur].isLeaf) {
         if (sample.size() <= nodes[cur].feature) {
             std::cerr << "Error: Sample data is too small for the current tree node feature index!" << std::endl;
-            return "";
+            return -1;
         }
         cur = (sample[nodes[cur].feature] < nodes[cur].threshold)
                   ? nodes[cur].leftIndex
                   : nodes[cur].rightIndex;
     }
-    return classLabels[nodes[cur].value];
+    return nodes[cur].value;
 }

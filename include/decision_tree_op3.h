@@ -10,7 +10,7 @@ class DecisionTreeOp3 {
 public:
 	void loadFromJson(const std::string& filename);
 	int buildTree(const json& treeData, int index);
-	std::string predict(const std::vector<double>& sample);
+	int predict(const std::vector<double>& sample) noexcept;
 
 private:
 	std::vector<int> features;

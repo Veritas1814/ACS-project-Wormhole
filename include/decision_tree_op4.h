@@ -12,7 +12,7 @@ public:
 
 	void loadFromJson(const std::string& filename);
 	void buildTree(const json& treeData);
-	std::string predict(const std::vector<double>& sample);
+	int predict(const std::vector<double>& sample) noexcept;
 
 private:
 	struct NodeOp4 {

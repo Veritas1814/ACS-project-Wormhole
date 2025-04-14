@@ -47,10 +47,10 @@ void DecisionTreeOp4::buildTree(const json& treeData) {
 }
 
 
-std::string DecisionTreeOp4::predict(const std::vector<double>& sample) {
+int DecisionTreeOp4::predict(const std::vector<double>& sample) noexcept {
     std::shared_ptr<NodeOp4> cur = nodes[0];
     while (!cur->isLeaf) {
         cur = (sample[cur->feature] < cur->threshold) ? cur->leftIndex : cur->rightIndex;
     }
-    return classLabels[cur->value];
+    return cur->value;
 }

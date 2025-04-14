@@ -11,5 +11,5 @@ public:
     std::vector<std::string> classLabels;
 
     void loadFromJson(const std::string& filename);
-    std::pair<std::vector<int>, std::string> predict(const std::vector<double>& sample);
+    std::pair<std::vector<int>, int> predict(const std::vector<double>& sample) noexcept;
 };

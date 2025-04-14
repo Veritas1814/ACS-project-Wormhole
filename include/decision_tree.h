@@ -13,7 +13,7 @@ public:
     void loadFromJson(const std::string& filename);
     void loadTree(const json& treeData);
     std::shared_ptr<Node> buildTree(const json& treeData, int index);
-    std::string predict(const std::vector<double>& sample);
+    int predict(const std::vector<double>& sample) noexcept;
 
 private:
     std::shared_ptr<Node> root;

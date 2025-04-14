@@ -73,15 +73,15 @@ void DecisionTree::loadTree(const json& treeData) {
     root = buildTree(treeData, 0);
 }
 
-std::string DecisionTree::predict(const std::vector<double>& sample) {
+int DecisionTree::predict(const std::vector<double>& sample) noexcept {
     auto node = root;
 
     while (node && !node->isLeaf) {
         if (sample.size() <= node->feature) {
             std::cerr << "Error: Sample data is too small for the current tree node feature index!" << std::endl;
-            return "";
+            return -1;
         }
         node = (sample[node->feature] < node->threshold) ? node->left : node->right;
     }
-    return node ? classLabels[node->value] : "";
+    return node ? node->value : -1;
 }

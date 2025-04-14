@@ -26,7 +26,7 @@ void readCSV(const std::string& filename, std::vector<std::vector<double>>& data
     }
 }
 
-void readPredictionsCSV(const std::string& filename, std::vector<std::string>& predictions) {
+void readPredictionsCSV(const std::string& filename, std::vector<int>& predictions) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Error: Cannot open file " << filename << std::endl;
@@ -37,11 +37,11 @@ void readPredictionsCSV(const std::string& filename, std::vector<std::string>& p
     std::getline(file, line); // Skip header
 
     while (std::getline(file, line)) {
-        predictions.push_back(line);
+        predictions.push_back(std::stoi(line));
     }
 }
 
-void saveCSV(const std::string& filename, const std::vector<std::string>& predictions) {
+void saveCSV(const std::string& filename, const std::vector<int>& predictions) {
     std::ofstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Error: Cannot open file " << filename << std::endl;
@@ -53,7 +53,7 @@ void saveCSV(const std::string& filename, const std::vector<std::string>& predic
     }
 }
 
-void comparePredictions(const std::vector<std::string>& py_preds, const std::vector<std::string>& cpp_preds) {
+void comparePredictions(const std::vector<int>& py_preds, const std::vector<int>& cpp_preds) {
     std::cout << "comparison done" << std::endl;
 
     int failed_count = 0;
@@ -92,13 +92,13 @@ int main(int argc, char* argv[]) {
     readCSV(testCsv, testData);
 
     // Make predictions
-    std::vector<std::string> cpp_predictions;
+    std::vector<int> cpp_predictions;
     for (const auto& sample : testData) {
-        cpp_predictions.push_back(tree.predict(sample));
+        cpp_predictions.push_back(tree.predict(sample)); // Assuming predict returns int
     }
 
     // Read Python predictions from the provided CSV
-    std::vector<std::string> py_predictions;
+    std::vector<int> py_predictions;
     readPredictionsCSV(pyPredictionsCsv, py_predictions);
 
     // Compare predictions

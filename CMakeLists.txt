@@ -50,7 +50,6 @@ add_executable(test_tree
         src/test_tree.cpp
         src/decision_tree.cpp
         src/node.cpp
-        src/decision_forest.cpp
 )
 
 add_executable(test_forest

@@ -50,10 +50,8 @@ with open(tree_output_file, "w") as f:
 # Read the test data and make predictions
 X_test = pd.read_csv(test_file)
 y_pred_encoded = model.predict(X_test)
-y_pred = label_encoder.inverse_transform(y_pred_encoded)
+predictions = pd.DataFrame({"Predicted_Species": y_pred_encoded})
 
-# Save the predictions to a CSV file
-predictions = pd.DataFrame({"Predicted_Species": y_pred})
 predictions.to_csv(predictions_output_file, index=False)
 
 print(f"Tree saved to {tree_output_file}")

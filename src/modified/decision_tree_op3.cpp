@@ -50,10 +50,10 @@ void DecisionTreeOp3::loadFromJson(const std::string& filename) {
     buildTree(tree, 0);
 }
 
-std::string DecisionTreeOp3::predict(const std::vector<double>& sample) {
+int DecisionTreeOp3::predict(const std::vector<double>& sample) noexcept {
     int cur = 0;
     while (!isLeaf[cur]) {
         cur = (sample[features[cur]] < thresholds[cur]) ? leftIndices[cur] : rightIndices[cur];
     }
-    return classLabels[values[cur]];
+    return values[cur];
 }
