@@ -1,5 +1,4 @@
-#ifndef NODE_H
-#define NODE_H
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -15,5 +14,3 @@ public:
 
     Node();
 };
-
-#endif // NODE_H
