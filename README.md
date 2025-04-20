@@ -45,7 +45,6 @@ make -j8
 
 Compile project with wormhole implementation:
 ```bash
-export ARCH_NAME=wormhole_b0
 mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_WORMHOLE_DECISION_TREE=ON ../
 make -j8

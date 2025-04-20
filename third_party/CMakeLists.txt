@@ -1,21 +1,7 @@
 # Inspired by https://github.com/tenstorrent/tt-mlir/blob/b55b6b0fb4149c7bc50d4d467d8fc9964ef082a5/third_party/CMakeLists.txt
 
 if (BUILD_WORMHOLE_DECISION_TREE)
-  # Set architecture
-  if ("$ENV{ARCH_NAME}" STREQUAL "grayskull")
-    set(ARCH_NAME "grayskull")
-    set(ARCH_EXTRA_DIR "grayskull")
-  elseif ("$ENV{ARCH_NAME}" STREQUAL "wormhole_b0")
-    set(ARCH_NAME "wormhole")
-    set(ARCH_EXTRA_DIR "wormhole/wormhole_b0_defines")
-  elseif ("$ENV{ARCH_NAME}" STREQUAL "blackhole")
-    set(ARCH_NAME "blackhole")
-    set(ARCH_EXTRA_DIR "blackhole")
-  else()
-    message(FATAL_ERROR "Unsupported ARCH_NAME: $ENV{ARCH_NAME}")
-  endif()
-
-  set(TTMETAL_INCLUDE_DIRS
+set(TTMETAL_INCLUDE_DIRS
       ${PROJECT_SOURCE_DIR}/third_party/tt-metal/src/tt-metal/ttnn
       ${PROJECT_SOURCE_DIR}/third_party/tt-metal/src/tt-metal/ttnn/cpp
       ${PROJECT_SOURCE_DIR}/third_party/tt-metal/src/tt-metal/ttnn/cpp/ttnn/deprecated
@@ -26,8 +12,6 @@ if (BUILD_WORMHOLE_DECISION_TREE)
       ${PROJECT_SOURCE_DIR}/third_party/tt-metal/src/tt-metal/tt_metal/third_party/umd
       ${PROJECT_SOURCE_DIR}/third_party/tt-metal/src/tt-metal/tt_metal/third_party/umd/device/api
       ${PROJECT_SOURCE_DIR}/third_party/tt-metal/src/tt-metal/tt_metal/hw/inc
-      ${PROJECT_SOURCE_DIR}/third_party/tt-metal/src/tt-metal/tt_metal/hw/inc/${ARCH_NAME}
-      ${PROJECT_SOURCE_DIR}/third_party/tt-metal/src/tt-metal/tt_metal/hw/inc/${ARCH_EXTRA_DIR}
       ${PROJECT_SOURCE_DIR}/third_party/tt-metal/src/tt-metal/tt_metal/third_party/umd/src/firmware/riscv/${ARCH_NAME}
       ${PROJECT_SOURCE_DIR}/third_party/tt-metal/src/tt-metal/tt_stl
       ${PROJECT_SOURCE_DIR}/third_party/tt-metal/src/tt-metal/tt_stl/tt_stl
