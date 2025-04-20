@@ -46,9 +46,11 @@ make -j8
 Compile project with wormhole implementation:
 ```bash
 export ARCH_NAME=wormhole_b0
-export TT_METAL_HOME=$(realpath ./third_party/tt-metal/src/tt-metal)
 mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_WORMHOLE_DECISION_TREE=ON ../
+make -j8
+cd ../
+export TT_METAL_HOME=$(realpath ./third_party/tt-metal/src/tt-metal)
 ```
 
 ### Running

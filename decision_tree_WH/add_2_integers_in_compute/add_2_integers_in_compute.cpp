@@ -57,7 +57,7 @@ int main() {
 
     /* Specify data movement kernels for reading/writing data to/from DRAM */
     // TODO: maybe there is better way of setting path to kernels?
-    const std::string rel_path_to_kernels = "../../../..//add_2_integers_in_compute/kernels/";
+    const std::string rel_path_to_kernels = "../../../../decision_tree_WH/add_2_integers_in_compute/kernels/";
     KernelHandle binary_reader_kernel_id = CreateKernel(
         program,
         rel_path_to_kernels + "dataflow/reader_binary_1_tile.cpp",
