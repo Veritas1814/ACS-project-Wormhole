@@ -36,11 +36,19 @@ and to train forest:
 python forest.py <train_file_csv> <test_file_csv> <forest_output_file_json> <predictions_output_file_forest_csv>
 ```
 
-Compile project:
+Compile project without wormhole implementation:
 ```bash
 mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release ../
 make -j8
+```
+
+Compile project with wormhole implementation:
+```bash
+export ARCH_NAME=wormhole_b0
+export TT_METAL_HOME=$(realpath ./third_party/tt-metal/src/tt-metal)
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_WORMHOLE_DECISION_TREE=ON ../
 ```
 
 ### Running
