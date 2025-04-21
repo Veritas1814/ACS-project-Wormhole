@@ -1,2 +1,2 @@
 add_executable(add_2_integers_in_compute_example add_2_integers_in_compute/add_2_integers_in_compute.cpp)
-target_link_libraries(add_2_integers_in_compute_example PRIVATE tt-metal nlohmann_json::nlohmann_json)
+target_link_libraries(add_2_integers_in_compute_example PRIVATE Metalium::Metal)

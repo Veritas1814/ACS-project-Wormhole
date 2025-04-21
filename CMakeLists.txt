@@ -15,6 +15,8 @@ endif()
 project(wormhole CXX)
 set(CMAKE_CXX_STANDARD 20)
 
+option(BUILD_WORMHOLE_DECISION_TREE "Build wormhole implementation of decision tree" OFF)
+
 if(APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT} -stdlib=libc++ -I${CMAKE_OSX_SYSROOT}/usr/include/c++/v1")
 endif()
@@ -23,14 +25,14 @@ endif()
 
 include(FetchContent)
 
+set(BENCHMARK_ENABLE_TESTING OFF)
+set(BENCHMARK_ENABLE_GTEST_TESTS OFF)
+
 FetchContent_Declare(
         benchmark
         GIT_REPOSITORY https://github.com/google/benchmark.git
         GIT_TAG main
 )
-set(BENCHMARK_ENABLE_TESTING OFF)
-set(BENCHMARK_ENABLE_GTEST_TESTS OFF)
-
 
 FetchContent_Declare(
         nlohmann_json
@@ -118,3 +120,8 @@ target_link_libraries(plot_result
         PRIVATE test_tree_final
         PRIVATE nlohmann_json::nlohmann_json
 )
+
+add_subdirectory(third-party)
+if (BUILD_WORMHOLE_DECISION_TREE)
+        add_subdirectory(decision_tree_WH)
+endif()
