@@ -49,9 +49,8 @@ cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_WORMHOLE_DECISION_TREE=ON ../  # You ca
 make -j$(nproc)
 ```
 
-### Export those environment variables before running WH code: 
+### Export this environment variables before running WH code: 
 ```bash
-export ARCH_NAME=wormhole_b0
 export TT_METAL_HOME=$(realpath ./third-party/tt-metal/)
 ```
 
