@@ -26,6 +26,12 @@ To begin with, we provided some example csv files based on iris dataset, which o
 
 In train.csv there is a dataset which is used for training a tree/forest model in Python. 
 
+### Build dependencies
+```bash
+git submodule update --init --recursive
+git submodule foreach --recursive 'git lfs fetch --all && git lfs pull'
+```
+
 ### Compilation
 Firstly, to train a tree run this:
 ```{bash}
@@ -39,8 +45,13 @@ python forest.py <train_file_csv> <test_file_csv> <forest_output_file_json> <pre
 Compile project:
 ```bash
 mkdir build && cd build
-cmake -DCMAKE_BUILD_TYPE=Release ../
-make -j8
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_WORMHOLE_DECISION_TREE=ON ../  # You can compile without WH if needed
+make -j$(nproc)
+```
+
+### Export this environment variables before running WH code: 
+```bash
+export TT_METAL_HOME=$(realpath ./third-party/tt-metal/)
 ```
 
 ### Running
