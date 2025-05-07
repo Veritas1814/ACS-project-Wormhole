@@ -52,22 +52,20 @@
 //     }
 // }
 #include "dataflow_api.h"
-
+#include "debug/dprint.h"
 void kernel_main() {
     uint32_t dst_addr = get_arg_val<uint32_t>(0);
-    uint32_t dst_bank_id = get_arg_val<uint32_t>(1);
-    uint32_t num_floats = get_arg_val<uint32_t>(2);  // new: how many floats to write
-
+    uint32_t tree_size = get_arg_val<uint32_t>(1);
+    uint32_t dst_bank_id = 0;
     uint64_t dst_noc_addr = get_noc_addr_from_bank_id<true>(dst_bank_id, dst_addr);
 
     constexpr uint32_t cb_id_out = tt::CBIndex::c_16;
     uint32_t ublock_size_bytes = get_tile_size(cb_id_out);
     uint32_t l1_read_addr = get_read_ptr(cb_id_out);
-
-    for (uint32_t i = 0; i < num_floats; ++i) {
-        cb_wait_front(cb_id_out, 1);
-        noc_async_write(l1_read_addr, dst_noc_addr + i * ublock_size_bytes, ublock_size_bytes);
-        noc_async_write_barrier();
-        cb_pop_front(cb_id_out, 1);
-    }
+    DPRINT_DATA1(DPRINT << "Hello, Master, I am running a void data movement kernel on NOC 1." << ENDL());
+    cb_wait_front(cb_id_out, 1);
+    noc_async_write(l1_read_addr, dst_noc_addr, tree_size);
+    noc_async_write_barrier();
+    cb_pop_front(cb_id_out, 1);
+    DPRINT_DATA1(DPRINT << "Hello, Master, I am running a void data movement kernel on NOC 1." << ENDL());
 }

@@ -66,25 +66,26 @@
 
 #include <stdint.h>
 #include "dataflow_api.h"
+#include "debug/dprint.h"
 
 void kernel_main() {
     // Args: DRAM address (byte), number of floats
-    uint32_t dram_src_addr = get_arg_val<uint32_t>(0);
-    uint32_t num_floats = get_arg_val<uint32_t>(1);
+    DPRINT_DATA0(DPRINT << "Hello, Master, I am running a void data movement kernel on NOC 0." << ENDL());
 
+    uint32_t forest_dram_buffer_addr = get_arg_val<uint32_t>(0);
+    uint32_t tree_size = get_arg_val<uint32_t>(1);
+    uint32_t bank_id = 0;
     constexpr uint32_t cb_id = tt::CBIndex::c_0;
 
     // Get tile size in bytes (1 float per ublock = 4 bytes if FP32)
     uint32_t ublock_bytes = get_tile_size(cb_id);  // usually 4 for float32
     uint32_t l1_write_addr = get_write_ptr(cb_id);
 
-    uint64_t noc_addr = get_noc_addr(dram_src_addr);
-
-    // Stream floats to CB
-    for (uint32_t i = 0; i < num_floats; ++i) {
-        cb_reserve_back(cb_id, 1);
-        noc_async_read(noc_addr + i * ublock_bytes, l1_write_addr, ublock_bytes);
-        noc_async_read_barrier();
-        cb_push_back(cb_id, 1);
-    }
+    uint64_t noc_addr = get_noc_addr_from_bank_id<true>(bank_id,forest_dram_buffer_addr);
+    DPRINT_DATA0(DPRINT << "Hello, Master, I am running a void data movement kernel on NOC 0." << ENDL());
+    cb_reserve_back(cb_id, 1); 
+    noc_async_read(noc_addr, l1_write_addr, tree_size);
+    noc_async_read_barrier();
+    cb_push_back(cb_id, 1);
+    DPRINT_DATA0(DPRINT << "Hello, Master, I am running a void data movement kernel on NOC 0." << ENDL());
 }
