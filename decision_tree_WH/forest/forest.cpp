@@ -13,6 +13,8 @@ using namespace tt::tt_metal;
 int main() {
     // Example float weights
     std::vector<float> forest(1024,1);
+    // std::vector<float> forest = {1.0f, 2.0f, 3.0f, 4.0f};
+
     uint32_t forest_size = forest.size();
     std::cout << forest_size << std::endl;
     /* Device and program setup */

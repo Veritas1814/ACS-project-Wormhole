@@ -59,13 +59,13 @@ void kernel_main() {
     uint32_t dst_bank_id = 0;
     uint64_t dst_noc_addr = get_noc_addr_from_bank_id<true>(dst_bank_id, dst_addr);
 
-    constexpr uint32_t cb_id_out = tt::CBIndex::c_16;
+    constexpr uint32_t cb_id_out = tt::CBIndex::c_0;
     uint32_t ublock_size_bytes = get_tile_size(cb_id_out);
     uint32_t l1_read_addr = get_read_ptr(cb_id_out);
-    DPRINT_DATA1(DPRINT << "Hello, Master, I am running a void data movement kernel on NOC 1." << ENDL());
+    DPRINT << "Hello, Master, I am running a void data movement kernel on NOC 1." << ENDL();
     cb_wait_front(cb_id_out, 1);
-    noc_async_write(l1_read_addr, dst_noc_addr, tree_size);
+    noc_async_write(l1_read_addr, dst_noc_addr, ublock_size_bytes);
     noc_async_write_barrier();
     cb_pop_front(cb_id_out, 1);
-    DPRINT_DATA1(DPRINT << "Hello, Master, I am running a void data movement kernel on NOC 1." << ENDL());
+    DPRINT << "Hello, Master, I am running a void data movement kernel on NOC 1." << ENDL();
 }

@@ -84,7 +84,7 @@ void kernel_main() {
     uint64_t noc_addr = get_noc_addr_from_bank_id<true>(bank_id,forest_dram_buffer_addr);
     DPRINT_DATA0(DPRINT << "Hello, Master, I am running a void data movement kernel on NOC 0." << ENDL());
     cb_reserve_back(cb_id, 1); 
-    noc_async_read(noc_addr, l1_write_addr, tree_size);
+    noc_async_read(noc_addr, l1_write_addr, ublock_bytes);
     noc_async_read_barrier();
     cb_push_back(cb_id, 1);
     DPRINT_DATA0(DPRINT << "Hello, Master, I am running a void data movement kernel on NOC 0." << ENDL());
