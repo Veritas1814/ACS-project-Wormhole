@@ -9,16 +9,19 @@ using json = nlohmann::json;
 class DecisionTreeFinal {
 public:
   void loadFromJson(const std::string& filename);
-  int predict(const std::vector<float>& sample);
+  int predict(const std::vector<float>& sample) const;
+  std::vector<float> getFlatVector() const;
 
 private:
   std::vector<int> features;
   std::vector<float> thresholds;
   std::vector<int> values;
-  std::vector<bool> isLeaf;
-  std::vector<int> leftIndices;
-  std::vector<int> rightIndices;
   std::vector<std::string> classLabels;
+  int depth = 0;
 
-  void buildTree(const json& treeData);
+  void buildFlatTree(const json& treeData);
+  void buildFlatRecursive(const json& treeData, int treeIdx, int flatIdx, int maxDepth, int currentDepth);
+  int computeDepth(const json& treeData, int nodeIdx) const;
+  void fillDummyLeaf(int idx, int predictedClass);
+
 };
