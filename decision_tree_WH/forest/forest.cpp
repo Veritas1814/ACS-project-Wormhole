@@ -5,7 +5,7 @@
 #include <tt-metalium/host_api.hpp>
 #include <tt-metalium/device.hpp>
 #include <tt-metalium/bfloat16.hpp>
-#include <decision_tree_final.h>
+#include "decision_tree_final.h"
 
 
 using namespace tt;
