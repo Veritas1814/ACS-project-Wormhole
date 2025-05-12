@@ -18,12 +18,21 @@ void DecisionTreeFinal::loadFromJson(const std::string& filename) {
 }
 
 void DecisionTreeFinal::buildFlatTree(const json& treeData) {
-    depth = computeDepth(treeData, 0);
+    std::cout << "pryvit buildFlat 1" << std::endl;
+
+    depth = computeDepth(treeData, 0, 1);
+    
     size_t totalNodes = (size_t(1) << depth) - 1;
+    std::cout << "pryvit bF 2 " << depth << std::endl;
 
     features.resize(totalNodes, -1);
+    std::cout << "pryvit 555" << std::endl;
+
     thresholds.resize(totalNodes, 0.0f);
+    std::cout << "pryvit 556" << std::endl;
+
     values.resize(totalNodes, -1);
+    std::cout << "pryvit bf 3" << std::endl;
 
     buildFlatRecursive(treeData, 0, 0, depth, 1);
 }
@@ -73,16 +82,19 @@ void DecisionTreeFinal::fillDummyLeaf(int idx, int predictedClass) {
     values[idx] = predictedClass;
 }
 
-int DecisionTreeFinal::computeDepth(const json& treeData, int nodeIdx) const {
+int DecisionTreeFinal::computeDepth(const json& treeData, int nodeIdx, int currentDepth = 1) const {
+    if (currentDepth > 15)  // limit depth here
+        return currentDepth;
+
     int left = treeData["children_left"][nodeIdx];
     int right = treeData["children_right"][nodeIdx];
 
     if (left == -1 && right == -1)
-        return 1;
+        return currentDepth;
 
-    int leftDepth = (left != -1) ? computeDepth(treeData, left) : 0;
-    int rightDepth = (right != -1) ? computeDepth(treeData, right) : 0;
-    return 1 + std::max(leftDepth, rightDepth);
+    int leftDepth = (left != -1) ? computeDepth(treeData, left, currentDepth + 1) : currentDepth;
+    int rightDepth = (right != -1) ? computeDepth(treeData, right, currentDepth + 1) : currentDepth;
+    return std::max(leftDepth, rightDepth);
 }
 
 int DecisionTreeFinal::predict(const std::vector<float>& sample) const {

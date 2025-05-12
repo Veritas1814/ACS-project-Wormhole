@@ -9,7 +9,7 @@ class RandomForest {
 public:
     std::vector<DecisionTreeFinal> trees;
     std::vector<std::string> classLabels;
-
+    std::vector<float> flattenForest() const;
     void loadFromJson(const std::string& filename);
-    std::pair<std::vector<int>, std::string> predict(const std::vector<double>& sample);
+    std::pair<std::vector<int>, int> predict(const std::vector<float>& sample);
 };

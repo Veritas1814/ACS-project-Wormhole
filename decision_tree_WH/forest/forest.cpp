@@ -7,7 +7,6 @@
 #include <tt-metalium/bfloat16.hpp>
 #include <decision_tree_final.h>
 
-
 using namespace tt;
 using namespace tt::tt_metal;
 void readCSV(const std::string& filename, std::vector<float>& data) {
@@ -30,11 +29,18 @@ void readCSV(const std::string& filename, std::vector<float>& data) {
 int main() {
     // Example float weights
     std::vector<float> samples;
+    std::cout << "pryvit" << std::endl;
     readCSV("/root/c150661229a53d9c021900f2235cc3a1/ACS-project-Wormhole/decision_tree_WH/forest/data/iris_test.csv", samples);
+    std::cout << "pryvit1" << std::endl;
+
     uint32_t n_samples = 20;
     uint32_t sample_vec_size =samples.size()* sizeof(float);
     DecisionTreeFinal tree; 
+    std::cout << sample_vec_size << " pryvit2" << std::endl;
+
     tree.loadFromJson("/root/c150661229a53d9c021900f2235cc3a1/ACS-project-Wormhole/decision_tree_WH/forest/data/tree.json");
+    std::cout << "pryvit3" << std::endl;
+
     std::vector<float> forest = tree.getFlatVector();
     // std::vector<float> forest(1024,1);//will be defined by function
     uint32_t n_trees = 1;

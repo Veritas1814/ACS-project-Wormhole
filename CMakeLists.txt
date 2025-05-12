@@ -44,82 +44,82 @@ FetchContent_MakeAvailable(benchmark nlohmann_json)
 
 # ============ Include Paths ============
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+# include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # ============ Executables ============
 
-add_executable(test_tree
-        src/test_tree.cpp
-        src/decision_tree.cpp
-        src/node.cpp
-)
+# add_executable(test_tree
+#         src/test_tree.cpp
+#         src/decision_tree.cpp
+#         src/node.cpp
+# )
 
-add_executable(test_forest
-        src/test_forest.cpp
-        src/decision_forest.cpp
-        src/node.cpp
-        src/decision_tree.cpp
-)
+# add_executable(test_forest
+#         src/test_forest.cpp
+#         src/decision_forest.cpp
+#         src/node.cpp
+#         src/decision_tree.cpp
+# )
 
-add_executable(test_forest_tp
-        src/test_forest.cpp
-        src/decision_forest_tp.cpp
-        src/node.cpp
-        src/decision_tree.cpp
-        src/thread_pool.cpp
-)
+# add_executable(test_forest_tp
+#         src/test_forest.cpp
+#         src/decision_forest_tp.cpp
+#         src/node.cpp
+#         src/decision_tree.cpp
+#         src/thread_pool.cpp
+# )
 
-add_executable(benchmark_wormhole
-        src/benchmark.cpp
-        src/decision_tree.cpp
-        src/node.cpp
-)
+# add_executable(benchmark_wormhole
+#         src/benchmark.cpp
+#         src/decision_tree.cpp
+#         src/node.cpp
+# )
 
-add_executable(plot_result
-        src/plot_result.cpp
-        src/decision_tree.cpp
-        src/node.cpp
-)
+# add_executable(plot_result
+#         src/plot_result.cpp
+#         src/decision_tree.cpp
+#         src/node.cpp
+# )
 
-# ============ Static Libraries ============
+# # ============ Static Libraries ============
 
-add_library(test_tree_op1 STATIC src/modified/decision_tree_op1.cpp)
-add_library(test_tree_op2 STATIC src/modified/decision_tree_op2.cpp)
-add_library(test_tree_op3 STATIC src/modified/decision_tree_op3.cpp)
-add_library(test_tree_op4 STATIC src/modified/decision_tree_op4.cpp)
-add_library(test_tree_final STATIC src/modified/decision_tree_final.cpp)
+# add_library(test_tree_op1 STATIC src/modified/decision_tree_op1.cpp)
+# add_library(test_tree_op2 STATIC src/modified/decision_tree_op2.cpp)
+# add_library(test_tree_op3 STATIC src/modified/decision_tree_op3.cpp)
+# add_library(test_tree_op4 STATIC src/modified/decision_tree_op4.cpp)
+# add_library(test_tree_final STATIC src/modified/decision_tree_final.cpp)
 
-# ============ Linking ============
+# # ============ Linking ============
 
-target_link_libraries(test_tree_op1 PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(test_tree_op2 PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(test_tree_op3 PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(test_tree_op4 PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(test_tree_final PRIVATE nlohmann_json::nlohmann_json)
+# target_link_libraries(test_tree_op1 PRIVATE nlohmann_json::nlohmann_json)
+# target_link_libraries(test_tree_op2 PRIVATE nlohmann_json::nlohmann_json)
+# target_link_libraries(test_tree_op3 PRIVATE nlohmann_json::nlohmann_json)
+# target_link_libraries(test_tree_op4 PRIVATE nlohmann_json::nlohmann_json)
+# target_link_libraries(test_tree_final PRIVATE nlohmann_json::nlohmann_json)
 
-target_link_libraries(test_tree PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(test_forest PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(test_forest_tp PRIVATE nlohmann_json::nlohmann_json)
+# target_link_libraries(test_tree PRIVATE nlohmann_json::nlohmann_json)
+# target_link_libraries(test_forest PRIVATE nlohmann_json::nlohmann_json)
+# target_link_libraries(test_forest_tp PRIVATE nlohmann_json::nlohmann_json)
 
-target_link_libraries(benchmark_wormhole
-        PRIVATE benchmark::benchmark
-        PRIVATE test_tree_op1
-        PRIVATE test_tree_op2
-        PRIVATE test_tree_op3
-        PRIVATE test_tree_op4
-        PRIVATE test_tree_final
-        PRIVATE nlohmann_json::nlohmann_json
-)
+# target_link_libraries(benchmark_wormhole
+#         PRIVATE benchmark::benchmark
+#         PRIVATE test_tree_op1
+#         PRIVATE test_tree_op2
+#         PRIVATE test_tree_op3
+#         PRIVATE test_tree_op4
+#         PRIVATE test_tree_final
+#         PRIVATE nlohmann_json::nlohmann_json
+# )
 
-target_link_libraries(plot_result
-        PRIVATE benchmark::benchmark
-        PRIVATE test_tree_op1
-        PRIVATE test_tree_op2
-        PRIVATE test_tree_op3
-        PRIVATE test_tree_op4
-        PRIVATE test_tree_final
-        PRIVATE nlohmann_json::nlohmann_json
-)
+# target_link_libraries(plot_result
+#         PRIVATE benchmark::benchmark
+#         PRIVATE test_tree_op1
+#         PRIVATE test_tree_op2
+#         PRIVATE test_tree_op3
+#         PRIVATE test_tree_op4
+#         PRIVATE test_tree_final
+#         PRIVATE nlohmann_json::nlohmann_json
+# )
 
 add_subdirectory(third-party)
 if (BUILD_WORMHOLE_DECISION_TREE)

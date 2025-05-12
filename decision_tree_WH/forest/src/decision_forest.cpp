@@ -46,7 +46,7 @@ void RandomForest::loadFromJson(const std::string& filename) {
         treeJson["classes"] = forest["classes"];
 
         try {
-            tree.buildTree(treeJson);
+            tree.buildFlatTree(treeJson);
         } catch (const std::exception &e) {
             std::cerr << "Error loading tree " << i << ": " << e.what() << std::endl;
             continue;
@@ -55,7 +55,7 @@ void RandomForest::loadFromJson(const std::string& filename) {
     }
 }
 
-std::pair<std::vector<int>, std::string> RandomForest::predict(const std::vector<double>& sample) {
+std::pair<std::vector<int>, int> RandomForest::predict(const std::vector<float>& sample) {
     std::map<int, int> votes;
 
     for (size_t i = 0; i < classLabels.size(); i++) {
@@ -65,15 +65,7 @@ std::pair<std::vector<int>, std::string> RandomForest::predict(const std::vector
     for (auto& tree : trees) {
         int prediction = -1;
         try {
-            std::string predStr = tree.predict(sample);
-
-            // Find the index of the predicted class
-            auto it = std::find(classLabels.begin(), classLabels.end(), predStr);
-            if (it == classLabels.end()) {
-                std::cerr << "Error: Class label '" << predStr << "' not found in classLabels" << std::endl;
-                continue;
-            }
-            prediction = std::distance(classLabels.begin(), it);
+            prediction = tree.predict(sample);
         } catch (const std::exception &e) {
             std::cerr << "Error in tree prediction: " << e.what() << std::endl;
             continue;
@@ -89,21 +81,35 @@ std::pair<std::vector<int>, std::string> RandomForest::predict(const std::vector
 
     if (votes.empty()) {
         std::cerr << "Error: No valid votes in random forest prediction" << std::endl;
-        return {std::vector<int>(classLabels.size(), 0), ""}; // Return zero votes and empty label
+        return {std::vector<int>(classLabels.size(), 0), -1};
     }
 
     auto maxVote = std::max_element(votes.begin(), votes.end(),
         [](const auto& a, const auto& b) { return a.second < b.second; });
-
-    if (maxVote == votes.end()) {
-        std::cerr << "Error: No valid votes in random forest prediction" << std::endl;
-        return {std::vector<int>(classLabels.size(), 0), ""};
-    }
 
     std::vector<int> voteCounts(classLabels.size(), 0);
     for (const auto& [index, count] : votes) {
         voteCounts[index] = count;
     }
 
-    return {voteCounts, classLabels[maxVote->first]};
+    return {voteCounts, maxVote->first};
+}
+
+std::vector<float> RandomForest::flattenForest() const {
+    std::vector<float> forestVector;
+
+    // Encode the number of trees first
+    forestVector.push_back(static_cast<float>(trees.size()));
+
+    for (const auto& tree : trees) {
+        std::vector<float> flatTree = tree.getFlatVector();
+// Encode the number of nodes in this tree
+        size_t nodeCount = flatTree.size() / 3;
+        forestVector.push_back(static_cast<float>(nodeCount));
+
+        // Append the flat tree
+        forestVector.insert(forestVector.end(), flatTree.begin(), flatTree.end());
+    }
+
+    return forestVector;
 }
