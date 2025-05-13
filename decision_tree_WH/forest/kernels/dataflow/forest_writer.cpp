@@ -6,7 +6,7 @@ void kernel_main() {
     uint32_t n_samples = get_arg_val<uint32_t>(2);
     uint32_t res_bank_id = 0;
 
-    constexpr uint32_t cb_id_out = tt::CBIndex::c_5;
+    constexpr uint32_t cb_id_out = tt::CBIndex::c_4;
     uint32_t ublock_size_bytes = get_tile_size(cb_id_out);
     uint32_t l1_read_addr = get_read_ptr(cb_id_out);
     DPRINT_DATA1(DPRINT << "Hello, Master, I am running in writer1." << ENDL());

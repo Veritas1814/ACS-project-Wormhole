@@ -47,15 +47,15 @@ namespace NAMESPACE {
                 int32_t feat = static_cast<int32_t>(cb_feature_addr[node]);
                 if (feat < 0)
                     break;
-                float x  = cb_sample_addr[feat];
-                float th = cb_treshold_addr[node];
+                float x  = reinterpret_cast<volatile float*>(cb_sample_addr)[feat];
+                float th = reinterpret_cast<volatile float*>(cb_treshold_addr)[node];
                 node = (x >= th) ? (2 * node + 2)
                                 : (2 * node + 1);
             }
 
             int32_t cls = static_cast<int32_t>(cb_value_addr[node]);
 
-            cb_wait_front(cb_out, 1);
+            cb_reserve_back(cb_out, 1);
             volatile uint32_t* cb_out_addr;
             cb_get_tile(cb_out, 0, &cb_out_addr);
             *cb_out_addr = cls;

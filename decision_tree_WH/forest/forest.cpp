@@ -68,34 +68,34 @@ int main() {
     // Create DRAM config for features
     tt_metal::InterleavedBufferConfig dram_feature_config{
         .device = device,
-        .size = features_size,
-        .page_size = feature_size1,
+        .size = features_size * sizeof(float),
+        .page_size = feature_size1 * sizeof(float),
         .buffer_type = tt_metal::BufferType::DRAM};
     // Create DRAM config for values
     tt_metal::InterleavedBufferConfig dram_value_config{
         .device = device,
-        .size = values_size,
-        .page_size = value_size1,
+        .size = values_size * sizeof(float),
+        .page_size = value_size1 * sizeof(float),
         .buffer_type = tt_metal::BufferType::DRAM};
     // Create DRAM config for threshold
     tt_metal::InterleavedBufferConfig dram_threshold_config{
         .device = device,
-        .size = thresholds_size,
-        .page_size = threshold_size1,
+        .size = thresholds_size * sizeof(float),
+        .page_size = threshold_size1 * sizeof(float),
         .buffer_type = tt_metal::BufferType::DRAM};
 
     // Create DRAM config for samples
     tt_metal::InterleavedBufferConfig dram_sample_config{
         .device = device,
-        .size = n_samples * sample_vec_size,
-        .page_size = sample_vec_size,
+        .size = n_samples * sample_vec_size * sizeof(float),
+        .page_size = sample_vec_size * sizeof(float),
         .buffer_type = tt_metal::BufferType::DRAM};
 
     // Create DRAM config for results
     tt_metal::InterleavedBufferConfig dram_res_config{
         .device = device,
-        .size = n_trees*n_samples,
-        .page_size = n_samples,
+        .size = n_trees*n_samples * sizeof(float),
+        .page_size = n_samples * sizeof(float),
         .buffer_type = tt_metal::BufferType::DRAM};
     
     //Creating Buffers
@@ -161,6 +161,12 @@ int main() {
         "/root/c150661229a53d9c021900f2235cc3a1/ACS-project-Wormhole/decision_tree_WH/forest/kernels/compute/forest_compute.cpp",
         core,
         tt_metal::ComputeConfig{.math_fidelity = MathFidelity::HiFi4, .compile_args ={n_trees,features_size,values_size,thresholds_size,feature_size1,value_size1,threshold_size1,n_samples,sample_vec_size}});
+
+
+    std::cout << "Feature buffer addr: " << std::hex << feature_dram_buffer->address() << std::endl;
+    std::cout << "Th buffer addr: " << std::hex << threshold_dram_buffer->address() << std::endl;
+    std::cout << "Val buffer addr: " << std::hex << value_dram_buffer->address() << std::endl;
+    std::cout << "Sample buffer addr: " << std::hex << sample_dram_buffer->address() << std::endl;
 
     // Set runtime args for core
     SetRuntimeArgs(program, reader_kernel, core, 
