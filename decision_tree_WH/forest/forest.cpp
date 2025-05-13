@@ -45,13 +45,13 @@ int main() {
     uint32_t n_trees = 1;
     uint32_t tree_size = forest.size();
 
-    // size_t forest_bytes = forest_size * sizeof(float);
+    // size_t forest_bytes = forest_size ;
     std::vector<float> features = tree.getFeatures();
     std::vector<float> values = tree.getValues();
     std::vector<float> threshold = tree.getTreshold();
-    uint32_t feature_size1 =features.size()*sizeof(float);
-    uint32_t value_size1 =values.size()*sizeof(float);
-    uint32_t threshold_size1 =threshold.size()*sizeof(float);
+    uint32_t feature_size1 =features.size();
+    uint32_t value_size1 =values.size();
+    uint32_t threshold_size1 =threshold.size();
 
     uint32_t features_size = n_trees*feature_size1; 
     uint32_t values_size = n_trees*value_size1; 
@@ -87,15 +87,15 @@ int main() {
     // Create DRAM config for samples
     tt_metal::InterleavedBufferConfig dram_sample_config{
         .device = device,
-        .size = n_samples * sample_vec_size* sizeof(float),
-        .page_size = sample_vec_size* sizeof(float),
+        .size = n_samples * sample_vec_size,
+        .page_size = sample_vec_size,
         .buffer_type = tt_metal::BufferType::DRAM};
 
     // Create DRAM config for results
     tt_metal::InterleavedBufferConfig dram_res_config{
         .device = device,
-        .size = n_trees*n_samples*sizeof(float),
-        .page_size = n_samples*sizeof(float),
+        .size = n_trees*n_samples,
+        .page_size = n_samples,
         .buffer_type = tt_metal::BufferType::DRAM};
     
     //Creating Buffers
@@ -141,8 +141,8 @@ int main() {
 
     constexpr uint32_t num_output_tiles = 1;
     CircularBufferConfig cb_output_config =
-        CircularBufferConfig(num_output_tiles *n_trees* n_samples*sizeof(float), {{output_cb_index, tt::DataFormat::Float16_b}})
-            .set_page_size(output_cb_index, n_samples*sizeof(float));
+        CircularBufferConfig(num_output_tiles *n_trees* n_samples, {{output_cb_index, tt::DataFormat::Float16_b}})
+            .set_page_size(output_cb_index, n_samples);
     CBHandle cb_output = tt_metal::CreateCircularBuffer(program, core, cb_output_config);
 
     // Attach data movement kernels
@@ -160,7 +160,7 @@ int main() {
         program,
         "/root/c150661229a53d9c021900f2235cc3a1/ACS-project-Wormhole/decision_tree_WH/forest/kernels/compute/forest_compute.cpp",
         core,
-        tt_metal::ComputeConfig{.math_fidelity = MathFidelity::HiFi4, .compile_args ={tree_size,n_trees,sample_vec_size,n_samples}});
+        tt_metal::ComputeConfig{.math_fidelity = MathFidelity::HiFi4, .compile_args ={n_trees,features_size,values_size,thresholds_size,feature_size1,value_size1,threshold_size1,n_samples,sample_vec_size}});
 
     // Set runtime args for core
     SetRuntimeArgs(program, reader_kernel, core, 

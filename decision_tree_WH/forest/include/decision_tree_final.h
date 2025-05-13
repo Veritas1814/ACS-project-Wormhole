@@ -15,9 +15,9 @@ public:
   void buildFlatRecursive(const json& treeData, int treeIdx, int flatIdx, int maxDepth, int currentDepth);
   int computeDepth(const json& treeData, int nodeIdx, int currentDepth) const;
   void fillDummyLeaf(int idx, int predictedClass);
-  std::vector<float> DecisionTreeFinal::getFeatures() const;
-  std::vector<float> DecisionTreeFinal::getValues() const;
-  std::vector<float> DecisionTreeFinal::getTreshold() const;
+  std::vector<float> getFeatures() const;
+  std::vector<float> getValues() const;
+  std::vector<float> getTreshold() const;
 
 private:
   std::vector<int> features;

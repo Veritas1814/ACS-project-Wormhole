@@ -15,17 +15,17 @@ void kernel_main() {
     uint32_t values_size = get_arg_val<uint32_t>(6);
     uint32_t thresholds_size = get_arg_val<uint32_t>(7);
 
-    uint32_t features_size1 = get_arg_val<uint32_t>(8);
-    uint32_t values_size1 = get_arg_val<uint32_t>(9);
-    uint32_t thresholds_size1 = get_arg_val<uint32_t>(10);
+    // uint32_t features_size1 = get_arg_val<uint32_t>(8);
+    // uint32_t values_size1 = get_arg_val<uint32_t>(9);
+    // uint32_t thresholds_size1 = get_arg_val<uint32_t>(10);
 
     uint32_t n_samples = get_arg_val<uint32_t>(11);
     uint32_t sample_vec_size = get_arg_val<uint32_t>(12);
 
-    constexpr uint32_t feature_bank_id = get_arg_val<uint32_t>(13); 
-    constexpr uint32_t value_bank_id = get_arg_val<uint32_t>(14);
-    constexpr uint32_t threshold_bank_id = get_arg_val<uint32_t>(15);
-    constexpr uint32_t sample_bank_id = get_arg_val<uint32_t>(16);
+    uint32_t feature_bank_id = get_arg_val<uint32_t>(13); 
+    uint32_t value_bank_id = get_arg_val<uint32_t>(14);
+    uint32_t threshold_bank_id = get_arg_val<uint32_t>(15);
+    uint32_t sample_bank_id = get_arg_val<uint32_t>(16);
 
     constexpr uint32_t feature_cb_index = tt::CBIndex::c_0;
     constexpr uint32_t value_cb_index = tt::CBIndex::c_1;
@@ -52,34 +52,34 @@ void kernel_main() {
     uint32_t sample_offset = sample_dram_buffer_addr;
     for (uint32_t i=0; i<n_trees; i++){
         uint64_t feature_noc_addr = get_noc_addr_from_bank_id<true>(feature_bank_id, feature_offset);
-        uint64_t value_noc_addr = get_noc_addr_from_bank_id<true>(feature_bank_id, value_offset);
-        uint64_t treshold_noc_addr = get_noc_addr_from_bank_id<true>(feature_bank_id, treshold_offset);
+        uint64_t value_noc_addr = get_noc_addr_from_bank_id<true>(value_bank_id, value_offset);
+        uint64_t treshold_noc_addr = get_noc_addr_from_bank_id<true>(threshold_bank_id, treshold_offset);
 
         cb_reserve_back(feature_cb_index, 1);
-        noc_async_read(feature_noc_addr, l1_write_addr_features, features_size1);
+        noc_async_read(feature_noc_addr, l1_write_addr_features, ublock_bytes_features);
         noc_async_read_barrier();
         cb_push_back(feature_cb_index, 1); 
-        feature_offset += features_size1;
+        feature_offset += ublock_bytes_features;
 
         cb_reserve_back(value_cb_index, 1);
-        noc_async_read(value_noc_addr, l1_write_addr_values, values_size1);
+        noc_async_read(value_noc_addr, l1_write_addr_values, ublock_bytes_values);
         noc_async_read_barrier();
         cb_push_back(value_cb_index, 1);
-        value_offset += values_size1;
+        value_offset += ublock_bytes_values;
 
         cb_reserve_back(threshold_cb_index, 1);
-        noc_async_read(treshold_noc_addr, l1_write_addr_treshold, thresholds_size1);
+        noc_async_read(treshold_noc_addr, l1_write_addr_treshold, ublock_bytes_treshold);
         noc_async_read_barrier();
         cb_push_back(threshold_cb_index, 1);
-        treshold_offset += thresholds_size1;
+        treshold_offset += ublock_bytes_treshold;
 
         for (uint32_t j=0; j<n_samples;j++){
             uint64_t sample_noc_addr = get_noc_addr_from_bank_id<true>(sample_bank_id, sample_offset);
             cb_reserve_back(sample_cb_index, 1);
-            noc_async_read(sample_noc_addr, l1_write_addr_samples, sample_vec_size);
+            noc_async_read(sample_noc_addr, l1_write_addr_samples, ublock_bytes_saples);
             noc_async_read_barrier();
             cb_push_back(sample_cb_index, 1); 
-            sample_offset+=sample_vec_size;
+            sample_offset+=ublock_bytes_saples;
         }
     }
 

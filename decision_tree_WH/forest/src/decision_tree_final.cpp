@@ -83,7 +83,7 @@ void DecisionTreeFinal::fillDummyLeaf(int idx, int predictedClass) {
 }
 
 int DecisionTreeFinal::computeDepth(const json& treeData, int nodeIdx, int currentDepth = 1) const {
-    if (currentDepth > 15)  // limit depth here
+    if (currentDepth > 11)  // limit depth here
         return currentDepth;
 
     int left = treeData["children_left"][nodeIdx];
