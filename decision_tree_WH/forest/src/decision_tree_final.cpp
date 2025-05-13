@@ -128,3 +128,24 @@ std::vector<float> DecisionTreeFinal::getFlatVector() const {
 
     return flat;
 }
+std::vector<float> DecisionTreeFinal::getFeatures() const {
+    std::vector<float> float_features;
+    for (size_t i = 0; i < features.size(); ++i) {
+        float_features.push_back(static_cast<float>(features[i]));
+    }
+    return float_features;
+}
+std::vector<float> DecisionTreeFinal::getValues() const {
+    std::vector<float> float_values;
+    for (size_t i = 0; i < features.size(); ++i) {
+        float_values.push_back(static_cast<float>(values[i]));
+    }
+    return float_values;
+}
+std::vector<float> DecisionTreeFinal::getTreshold() const {
+    std::vector<float> float_treshold;
+    for (size_t i = 0; i < features.size(); ++i) {
+        float_treshold.push_back(thresholds[i]);
+    }
+    return float_treshold;
+}
