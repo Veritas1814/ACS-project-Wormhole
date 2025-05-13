@@ -156,11 +156,11 @@ int main() {
         core,
         DataMovementConfig{.processor = DataMovementProcessor::RISCV_0, .noc = NOC::RISCV_0_default});
 
-    auto compute_single_core_kernel_id = tt_metal::CreateKernel(
-        program,
-        "/root/c150661229a53d9c021900f2235cc3a1/ACS-project-Wormhole/decision_tree_WH/forest/kernels/compute/forest_compute.cpp",
-        core,
-        tt_metal::ComputeConfig{.math_fidelity = MathFidelity::HiFi4, .compile_args ={n_trees,features_size,values_size,thresholds_size,feature_size1,value_size1,threshold_size1,n_samples,sample_vec_size}});
+    // auto compute_single_core_kernel_id = tt_metal::CreateKernel(
+    //     program,
+    //     "/root/c150661229a53d9c021900f2235cc3a1/ACS-project-Wormhole/decision_tree_WH/forest/kernels/compute/forest_compute.cpp",
+    //     core,
+    //     tt_metal::ComputeConfig{.math_fidelity = MathFidelity::HiFi4, .compile_args ={n_trees,features_size,values_size,thresholds_size,feature_size1,value_size1,threshold_size1,n_samples,sample_vec_size}});
 
 
     std::cout << "Feature buffer addr: " << std::hex << feature_dram_buffer->address() << std::endl;

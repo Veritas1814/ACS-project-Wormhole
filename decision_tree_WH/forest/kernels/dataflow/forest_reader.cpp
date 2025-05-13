@@ -51,29 +51,23 @@ void kernel_main() {
     uint32_t treshold_offset =threshold_dram_buffer_addr;
     uint32_t sample_offset = sample_dram_buffer_addr;
     for (uint32_t i=0; i<n_trees; i++){
-        uint64_t feature_noc_addr = get_noc_addr_from_bank_id<true>(feature_bank_id, feature_offset);
-        uint64_t value_noc_addr = get_noc_addr_from_bank_id<true>(value_bank_id, value_offset);
-        uint64_t treshold_noc_addr = get_noc_addr_from_bank_id<true>(threshold_bank_id, treshold_offset);
+        uint64_t offset = ublock_bytes_treshold * i;
+        uint64_t feature_noc_addr = get_noc_addr_from_bank_id<true>(feature_bank_id, feature_dram_buffer_addr + offset);
+        uint64_t value_noc_addr = get_noc_addr_from_bank_id<true>(value_bank_id, value_dram_buffer_addr + offset);
+        uint64_t treshold_noc_addr = get_noc_addr_from_bank_id<true>(threshold_bank_id, threshold_dram_buffer_addr + offset);
 
         cb_reserve_back(feature_cb_index, 1);
-        noc_async_read(feature_noc_addr, l1_write_addr_features, ublock_bytes_features);
-        noc_async_read_barrier();
-        cb_push_back(feature_cb_index, 1); 
-        feature_offset += ublock_bytes_features;
-
         cb_reserve_back(value_cb_index, 1);
-        noc_async_read(value_noc_addr, l1_write_addr_values, ublock_bytes_values);
-        noc_async_read_barrier();
-        cb_push_back(value_cb_index, 1);
-        value_offset += ublock_bytes_values;
-
         cb_reserve_back(threshold_cb_index, 1);
+        noc_async_read(feature_noc_addr, l1_write_addr_features, ublock_bytes_features);
+        noc_async_read(value_noc_addr, l1_write_addr_values, ublock_bytes_values);
         noc_async_read(treshold_noc_addr, l1_write_addr_treshold, ublock_bytes_treshold);
         noc_async_read_barrier();
+        cb_push_back(feature_cb_index, 1); 
+        cb_push_back(value_cb_index, 1);
         cb_push_back(threshold_cb_index, 1);
-        treshold_offset += ublock_bytes_treshold;
 
-        for (uint32_t j=0; j<n_samples;j++){
+        for (uint32_t j=0; j<n_samples;++j){
             uint64_t sample_noc_addr = get_noc_addr_from_bank_id<true>(sample_bank_id, sample_offset);
             cb_reserve_back(sample_cb_index, 1);
             noc_async_read(sample_noc_addr, l1_write_addr_samples, ublock_bytes_saples);
@@ -81,6 +75,54 @@ void kernel_main() {
             cb_push_back(sample_cb_index, 1); 
             sample_offset+=ublock_bytes_saples;
         }
+    }
+    constexpr auto cb_out    = tt::CBIndex::c_4;
+    
+    for (uint32_t s = 0; s < n_samples; ++s) {
+        cb_wait_front(sample_cb_index, 1);
+        cb_wait_front(feature_cb_index, 1);
+        cb_wait_front(value_cb_index, 1);
+        cb_wait_front(threshold_cb_index, 1);
+
+        uint32_t cb_sample_addr=get_read_ptr(sample_cb_index);
+        uint32_t cb_feature_addr=get_read_ptr(feature_cb_index);
+        uint32_t cb_value_addr=get_read_ptr(value_cb_index);
+        uint32_t cb_treshold_addr=get_read_ptr(threshold_cb_index);
+
+        volatile float* cb_value_ptr = reinterpret_cast<volatile float*>(cb_value_addr);
+        volatile float* cb_feature_ptr = reinterpret_cast<volatile float*>(cb_feature_addr);
+
+        int32_t node = 0;
+        while (true) {
+            int32_t feat = static_cast<int32_t>(cb_feature_ptr[node]);
+            if (feat < 0)
+                break;
+            float x  = reinterpret_cast<volatile float*>(cb_sample_addr)[feat];
+            float th = reinterpret_cast<volatile float*>(cb_treshold_addr)[node];
+            node = (x >= th) ? (2 * node + 2)
+                            : (2 * node + 1);
+        }
+
+        int32_t cls = static_cast<int32_t>(cb_value_ptr[node]);
+
+        cb_reserve_back(cb_out, 1);
+        volatile float* cb_out_ptr = reinterpret_cast<volatile float*>(get_write_ptr(cb_out));
+        *cb_out_ptr = static_cast<float>(cls);
+        
+        // cb_release_tile(cb_out);
+        cb_push_back(cb_out, 1);
+
+        // cb_release_tile(sample_cb_index);
+        // cb_release_tile(feature_cb_index);
+        // cb_release_tile(value_cb_index);
+        // cb_release_tile(threshold_cb_index);
+        
+        cb_pop_front(sample_cb_index, 1);
+        cb_pop_front(feature_cb_index, 1);
+        cb_pop_front(value_cb_index, 1);
+        cb_pop_front(threshold_cb_index, 1);
+
+        
     }
 
     DPRINT_DATA0(DPRINT << "Hello, Master, I am running a void data movement kernel on NOC 0." << ENDL());
