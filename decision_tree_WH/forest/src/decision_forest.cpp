@@ -1,12 +1,7 @@
 #include "decision_forest.h"
-#include "thread_pool.h"
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
-#include <future>
-#include <map>
-#include <vector>
-#include <algorithm>
 
 void RandomForest::loadFromJson(const std::string& filename) {
     std::ifstream file(filename);
@@ -16,7 +11,12 @@ void RandomForest::loadFromJson(const std::string& filename) {
     }
 
     json forestData;
-    file >> forestData;
+    try {
+        file >> forestData;
+    } catch (const std::exception &e) {
+        std::cerr << "Error parsing JSON: " << e.what() << std::endl;
+        return;
+    }
 
     auto& forest = forestData["forest"];
     if (!forest.contains("classes")) {
@@ -35,40 +35,48 @@ void RandomForest::loadFromJson(const std::string& filename) {
 
     trees.clear();
     for (size_t i = 0; i < forest["feature"].size(); i++) {
-        DecisionTree tree;
+        DecisionTreeFinal tree;
         json treeJson;
         treeJson["feature"]        = forest["feature"][i];
         treeJson["threshold"]      = forest["threshold"][i];
         treeJson["children_left"]  = forest["children_left"][i];
         treeJson["children_right"] = forest["children_right"][i];
         treeJson["value"]          = forest["value"][i];
-        treeJson["classes"]        = forest["classes"];
 
-        tree.loadTree(treeJson);
+        treeJson["classes"] = forest["classes"];
 
+        try {
+            tree.buildFlatTree(treeJson);
+        } catch (const std::exception &e) {
+            std::cerr << "Error loading tree " << i << ": " << e.what() << std::endl;
+            continue;
+        }
         trees.push_back(tree);
     }
 }
 
-std::pair<std::vector<int>, int> RandomForest::predict(const std::vector<double>& sample) noexcept {
-    ThreadPool pool(std::thread::hardware_concurrency());
-
+std::pair<std::vector<int>, int> RandomForest::predict(const std::vector<float>& sample) {
     std::map<int, int> votes;
-    std::mutex voteMutex;
-    std::vector<std::future<int>> futures;
 
-    for (auto& tree : trees) {
-        futures.push_back(pool.submit([&tree, &sample]() -> int {
-            return tree.predict(sample);
-        }));
+    for (size_t i = 0; i < classLabels.size(); i++) {
+        votes[i] = 0;
     }
 
-    for (auto& future : futures) {
-        int prediction = future.get();
-        if (prediction >= 0 && static_cast<size_t>(prediction) < classLabels.size()) {
-            std::lock_guard<std::mutex> lock(voteMutex);
-            votes[prediction]++;
+    for (auto& tree : trees) {
+        int prediction = -1;
+        try {
+            prediction = tree.predict(sample);
+        } catch (const std::exception &e) {
+            std::cerr << "Error in tree prediction: " << e.what() << std::endl;
+            continue;
         }
+
+        if (prediction < 0 || static_cast<size_t>(prediction) >= classLabels.size()) {
+            std::cerr << "Warning: tree prediction " << prediction << " is out of valid range" << std::endl;
+            continue;
+        }
+
+        votes[prediction]++;
     }
 
     if (votes.empty()) {
@@ -80,9 +88,28 @@ std::pair<std::vector<int>, int> RandomForest::predict(const std::vector<double>
         [](const auto& a, const auto& b) { return a.second < b.second; });
 
     std::vector<int> voteCounts(classLabels.size(), 0);
-    for (const auto& [classIdx, count] : votes) {
-        voteCounts[classIdx] = count;
+    for (const auto& [index, count] : votes) {
+        voteCounts[index] = count;
     }
 
     return {voteCounts, maxVote->first};
+}
+
+std::vector<float> RandomForest::flattenForest() const {
+    std::vector<float> forestVector;
+
+    // Encode the number of trees first
+    forestVector.push_back(static_cast<float>(trees.size()));
+
+    for (const auto& tree : trees) {
+        std::vector<float> flatTree = tree.getFlatVector();
+// Encode the number of nodes in this tree
+        size_t nodeCount = flatTree.size() / 3;
+        forestVector.push_back(static_cast<float>(nodeCount));
+
+        // Append the flat tree
+        forestVector.insert(forestVector.end(), flatTree.begin(), flatTree.end());
+    }
+
+    return forestVector;
 }
